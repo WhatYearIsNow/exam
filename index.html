@@ -272,6 +272,7 @@
         <button class="nav-btn" id="nav-prepare" onclick="goPrepare('normal')">练习中心</button>
         <button class="nav-btn" id="nav-history" onclick="switchPage('history')">历史记录</button>
         <button class="nav-btn" id="nav-wrong" onclick="switchPage('wrong')">错题回顾</button>
+        <button class="nav-btn" id="nav-stats" onclick="window.open('/stats','_blank')" style="display:none;">全服统计</button>
     </nav>
 
     <main>
@@ -444,6 +445,13 @@
     
     // Expose multi-choice flag globally
     window.__HAS_MULTI = hasMulti;
+
+    // Server mode detection
+    window.__ON_SERVER = (window.location.protocol !== 'file:');
+    if (window.__ON_SERVER) {
+        var statsBtn = document.getElementById('nav-stats');
+        if (statsBtn) statsBtn.style.display = '';
+    }
 })();
 </script>
 <script>
@@ -959,6 +967,10 @@ function finish() {
         const rm = rt.lastRec.mode || "train";
         modeInfo.innerText = "模式：" + (modeNames[rm] || "") + " | 题数：" + rt.pool.length;
     }
+    // 服务器模式：自动上报
+    if (window.__ON_SERVER) {
+        submitToServer(score, fullTrace);
+    }
     switchPage("result");
 }
 
@@ -1209,6 +1221,53 @@ function saveWrong(traceItem) {
     let wData = JSON.parse(localStorage.getItem('W_DATA_'+user) || '{}');
     wData[traceItem.qid] = traceItem;
     localStorage.setItem('W_DATA_'+user, JSON.stringify(wData));
+}
+
+// ====================== 服务器上报 ======================
+function submitToServer(score, fullTrace) {
+    var subject = (typeof QUIZ_META !== 'undefined' && QUIZ_META.subject) || '未知科目';
+    var mode = rt._sessionMode || 'train';
+
+    var wrongs = [];
+    fullTrace.forEach(function(t) {
+        if (!t.ok && !t.skipped) {
+            var q = DB.find(function(item) { return item.id === t.qid; });
+            if (q) {
+                wrongs.push({
+                    qid: t.qid,
+                    qtext: q.q,
+                    chapter: q.chap || '',
+                    answer: q.multi ? q.ca.map(function(ci) { return String.fromCharCode(65+ci); }).join('') : String.fromCharCode(65+q.c)
+                });
+            }
+        }
+    });
+
+    var payload = {
+        username: user,
+        subject: subject,
+        score: score,
+        total: rt.pool.length,
+        mode: mode,
+        wrongs: wrongs
+    };
+
+    try {
+        fetch('/api/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        }).then(function(res) {
+            return res.json();
+        }).then(function(data) {
+            if (data.success) {
+                var modeInfo = document.getElementById('res-mode-info');
+                if (modeInfo) {
+                    modeInfo.innerText += ' | 数据已同步至全服统计';
+                }
+            }
+        }).catch(function() { /* 静默失败，不影响本地功能 */ });
+    } catch(e) { /* 静默失败 */ }
 }
 
 </script>
