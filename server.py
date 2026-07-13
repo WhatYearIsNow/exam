@@ -1,7 +1,8 @@
 """
-TJU-Quiz-Hub 服务器
+TJU-Quiz-Hub 服务器（参考方案，作者未实测）
 一键启动：pip install flask && python server.py
 学生访问 http://服务器IP:5000 即可刷题，数据自动汇总。
+注意：此方案未经充分测试，生产环境使用前请自行评估。
 """
 import sqlite3
 import os
