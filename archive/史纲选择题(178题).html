@@ -1,0 +1,3456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>中国近现代史纲要 题库练习</title>
+    <style>
+        :root { 
+            --tju-blue: #004098; --tju-light: #eff6ff; --bg: #f4f7f9; 
+            --ok: #10b981; --err: #f43f5e; --t1: #1e293b; --t2: #64748b; 
+        }
+        * { box-sizing: border-box; outline: none; }
+        body { font-family: 'PingFang SC', sans-serif; background: var(--bg); margin: 0; display: flex; justify-content: center; min-height: 100vh; }
+
+        .global-watermark {
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 600px; max-width: 80%; opacity: 0.08; pointer-events: none; z-index: 9999;
+        }
+
+        .app { 
+            width: 95%; max-width: 1100px; margin: 30px auto; 
+            background: rgba(255, 255, 255, 0.75); backdrop-filter: blur(10px);
+            display: flex; flex-direction: column; box-shadow: 0 20px 50px rgba(0,0,0,0.1); 
+            border-radius: 20px; position: relative; z-index: 10; min-height: 85vh;
+        }
+        
+        header { padding: 25px 40px; background: var(--tju-blue); color: #fff; border-radius: 20px 20px 0 0; display: flex; justify-content: space-between; align-items: center; }
+        nav { display: none; background: rgba(255,255,255,0.8); border-bottom: 1px solid #eee; padding: 0 30px; }
+        .nav-btn { padding: 15px 25px; border: none; background: none; font-size: 16px; font-weight: 600; color: var(--t2); cursor: pointer; border-bottom: 4px solid transparent; }
+        .nav-btn.active { color: var(--tju-blue); border-bottom-color: var(--tju-blue); }
+
+        main { padding: 40px; flex: 1; }
+        .page { display: none; }
+        .page.active { display: block; }
+
+        .tag-chapter { display: inline-block; padding: 4px 10px; background: var(--tju-blue); color: #fff; border-radius: 4px; font-size: 12px; margin-bottom: 10px; }
+        .q-text { font-size: 22px; font-weight: 700; margin-bottom: 25px; color: var(--tju-blue); }
+        
+        .opt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .opt { padding: 20px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; display: flex; align-items: center; background: #fff; transition: 0.2s; }
+        .opt-idx { width: 30px; height: 30px; background: var(--tju-light); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-weight: bold; color: var(--tju-blue); }
+        .opt.correct { background: #ecfdf5 !important; border-color: var(--ok) !important; }
+        .opt.wrong { background: #fff1f2 !important; border-color: var(--err) !important; }
+
+        .ana-box {
+            background: linear-gradient(135deg, #f8fbff, #eef4ff);
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 6px solid var(--tju-blue);
+            margin: 20px 0;
+            color: var(--t1);
+        }
+        .btn-p {
+            padding: 12px 30px;
+            background: var(--tju-blue);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            margin-right: 10px;
+            transition: 0.2s;
+        }
+        .btn-p:hover { transform: translateY(-1px); }
+        .quiz-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0 22px;
+            flex-wrap: wrap;
+        }
+        .quiz-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+        .btn-soft { background: #94a3b8; color: #fff; opacity: 0.9; }
+        .btn-soft:hover { background: #7b8aa0; opacity: 1; }
+        .btn-light {
+            background: #eef4ff;
+            color: var(--tju-blue);
+            border: 1px solid #c9d8f2;
+        }
+        .progress-panel {
+            display: none;
+            background: linear-gradient(135deg, #f8fbff, #eef4ff);
+            border: 1px solid #dbe7fb;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 22px;
+        }
+        .progress-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            color: var(--tju-blue);
+            font-weight: 700;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .progress-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(48px, 1fr));
+            gap: 10px;
+        }
+        .progress-item {
+            height: 42px;
+            border-radius: 10px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: var(--t2);
+            cursor: pointer;
+            font-weight: 700;
+        }
+        .progress-item.current { border-color: var(--tju-blue); background: var(--tju-blue); color: #fff; }
+        .progress-item.done { border-color: var(--ok); background: #ecfdf5; color: #047857; }
+        .progress-item.wrong { border-color: var(--err); background: #fff1f2; color: #be123c; }
+        .progress-item.todo { border-color: #cbd5e1; background: #fff; color: #64748b; }
+        .campus-line {
+            margin-top: 24px;
+            padding: 14px 18px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, rgba(0,64,152,0.08), rgba(0,64,152,0.02));
+            border: 1px solid rgba(0,64,152,0.12);
+            color: var(--tju-blue);
+            text-align: center;
+            font-size: 15px;
+            line-height: 1.8;
+        }
+        .campus-line strong {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+            color: var(--t2);
+            letter-spacing: 1px;
+        }
+        .history-tools {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+        .score-chart {
+            display: none;
+            background: #fff;
+            border: 1px solid #dbe7fb;
+            border-radius: 16px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 24px rgba(0,64,152,0.06);
+        }
+        .score-chart h3 {
+            margin: 0 0 12px;
+            color: var(--tju-blue);
+        }
+        .score-chart svg {
+            width: 100%;
+            height: 260px;
+            display: block;
+        }
+        .chart-axis {
+            stroke: #cbd5e1;
+            stroke-width: 1;
+        }
+        .chart-line {
+            fill: none;
+            stroke: var(--tju-blue);
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        .chart-dot {
+            fill: #fff;
+            stroke: var(--tju-blue);
+            stroke-width: 3;
+        }
+        .chart-label {
+            fill: var(--t2);
+            font-size: 12px;
+        }
+        @media (max-width: 768px) {
+            .opt-grid { grid-template-columns: 1fr; }
+            .quiz-toolbar { align-items: stretch; }
+            .quiz-actions { width: 100%; }
+            .quiz-actions .btn-p { flex: 1; margin-right: 0; }
+        }
+        .mode-card { border: 2px solid #eee; padding: 20px; border-radius: 12px; cursor: pointer; text-align: center; background: #fff; transition: 0.2s; }
+        .mode-card.active { border-color: var(--tju-blue); background: var(--tju-light); }
+        
+        .category-header { background: #f8fafc; padding: 10px 15px; border-radius: 8px; margin: 25px 0 10px 0; color: var(--tju-blue); font-weight: bold; border-left: 4px solid var(--tju-blue); display: flex; justify-content: space-between; }
+        
+        .snap-item { border-bottom: 1px solid #eee; padding: 25px 0; }
+        .item-card { background: #fff; border: 1px solid #eee; border-radius: 12px; padding: 15px; margin-bottom: 10px; cursor: pointer; position: relative; }
+        .del-btn { position: absolute; right: 15px; top: 15px; color: var(--err); border: 1px solid var(--err); padding: 2px 8px; border-radius: 4px; font-size: 12px; cursor: pointer; z-index: 5; }
+        .del-btn:hover { background: var(--err); color: #fff; }
+
+        /* 多行代码块 - 仿图片风格 */
+        .code-box {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 12px;
+            border-left: 6px solid var(--tju-blue);
+            font-family: Consolas, 'Courier New', monospace;
+            white-space: pre;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-size: 15px;
+            line-height: 1.6;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+
+<img class="global-watermark" src="https://www.tju.edu.cn/images/logo.png" alt="TJU">
+
+<div class="app">
+    <header><div class="logo">I love TJU | 客观题答题系统</div><div id="u-tag"></div></header>
+    <nav id="main-nav">
+        <button class="nav-btn" id="nav-prepare" onclick="goPrepare('normal')">练习中心</button>
+        <button class="nav-btn" id="nav-history" onclick="switchPage('history')">历史记录</button>
+        <button class="nav-btn" id="nav-wrong" onclick="switchPage('wrong')">错题回顾</button>
+    </nav>
+
+    <main>
+        <div id="page-login" class="page active" style="text-align:center; padding-top:60px;">
+            <h2 style="color:var(--tju-blue)">中国近现代史纲要 题库练习</h2>
+            <input type="text" id="user-input" placeholder="输入姓名" style="padding:15px; width:300px; border:1px solid #ddd; border-radius:10px;">
+            <button class="btn-p" onclick="doLogin()">进入</button>
+        </div>
+
+        <div id="page-prepare" class="page">
+            <div style="max-width:600px; margin:0 auto; text-align:center; padding:30px; border:2px dashed var(--tju-blue); border-radius:20px;">
+                <h3 id="prep-mode-title">请选择练习模式</h3>
+                <p>模式：<span id="prep-mode-name">-</span> | 题目：<span id="prep-count">-</span> 题</p>
+                <div id="hard-config" style="display:none; margin-bottom:15px;">数量：<input type="number" id="hard-num" value="5" style="width:50px;"></div>
+                <button class="btn-p" style="width:200px; height:50px; font-size:18px;" onclick="realStart()">开始挑战</button>
+            </div>
+            <div id="campus-line" class="campus-line">
+                <strong>北洋校歌</strong>
+                <span id="campus-line-text"></span>
+            </div>            <div id="mode-selector" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:20px; margin-top:30px;">
+                <div class="mode-card active" onclick="selectInitialMode('standard')"><h4>📜 标准模式</h4></div>
+                <div class="mode-card" onclick="selectInitialMode('random')"><h4>🎲 随机模式</h4></div>
+                <div class="mode-card" onclick="selectInitialMode('hard')"><h4>🔥 困难模式</h4></div>
+            </div>
+        </div>
+
+        <div id="page-quiz" class="page">
+            <div style="display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+                <div id="tag-container"></div>
+                <div id="q-meta-idx" style="color:var(--t2)"></div>
+            </div>
+            <div class="quiz-toolbar">
+                <button class="btn-p btn-light" onclick="toggleProgressPanel()">查看作答情况</button>
+                <div class="quiz-actions">
+                    <button class="btn-p btn-soft" onclick="submitPaper()">提交试卷</button>
+                    <button class="btn-p" onclick="nextQ()">下一题 (Enter)</button>
+                </div>
+            </div>
+            <div id="progress-panel" class="progress-panel"></div>
+            <div id="q-text" class="q-text"></div>
+            <div id="opt-box" class="opt-grid"></div>
+            <div style="text-align:center; margin:12px 0; display:none;" id="multi-confirm-area">
+                <button class="btn-p" onclick="confirmMultiAnswer()" style="background:#10b981;">确认多选答案</button>
+            </div>
+            <div id="ana-area" style="display:none">
+                <div class="ana-box" id="ana-cont"></div>
+            </div>
+        </div>
+
+        <div id="page-result" class="page" style="text-align:center;">
+            <h1 id="res-score" style="font-size:100px; color:var(--tju-blue); margin:20px 0;">0</h1>
+            <button class="btn-p" onclick="showSnap(null, true)">查看作答详情</button>
+            <button class="btn-p" style="background:#64748b" onclick="goPrepare('normal')">返回中心</button>
+        </div>
+
+        <div id="page-snap" class="page">
+            <div id="snap-list"></div>
+            <div id="snap-footer" style="margin-top:30px; padding-bottom:50px; text-align:center;">
+                <button class="btn-p" id="snap-back-btn" onclick="switchPage('history')">返回列表</button>
+                <button class="btn-p" style="background:#64748b" onclick="goPrepare('normal')">返回中心</button>
+            </div>
+        </div>
+
+        <div id="page-history" class="page">
+            <div class="history-tools">
+                <div style="color:var(--t2);">历史成绩与答题记录</div>
+                <button class="btn-p btn-light" id="score-chart-btn" style="display:none" onclick="toggleScoreChart()">查看成绩曲线</button>
+            </div>
+            <div id="score-chart" class="score-chart"></div>
+            <div id="hist-list"></div>
+        </div>
+
+        <div id="page-wrong" class="page">
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:20px;">
+                <button class="btn-p" style="background:#f59e0b" onclick="goPrepare('w_order')">顺序重练</button>
+                <button class="btn-p" style="background:#8b5cf6" onclick="goPrepare('w_rand')">随机重练</button>
+                <button class="btn-p" style="background:#ef4444" onclick="goPrepare('w_freq')">难点攻克</button>
+            </div>
+            <div id="w-content"></div>
+        </div>
+    </main>
+</div>
+
+<script>
+const questionData = [
+            // 第001题
+            {
+                title: "【单项选择题001】",
+                desc: "中国民主革命的主力军是（　　）",
+                code: "",
+                options: [
+                    "A. 地主阶级",
+                    "B. 工人阶级",
+                    "C. 农民阶级",
+                    "D. 资产阶级"
+                ],
+                answer: "C",
+                analysis: "农民阶级是中国民主革命的主力军。工人阶级是领导阶级，地主阶级是革命对象，资产阶级具有两面性。"
+            },
+            // 第002题
+            {
+                title: "【单项选择题002】",
+                desc: "19世纪末资本主义进入帝国主义阶段后，（　　）成为殖民剥削的重要形式，并出现瓜分世界的狂潮。",
+                code: "",
+                options: [
+                    "A. 贩卖奴隶",
+                    "B. 掠夺土地",
+                    "C. 商品输出",
+                    "D. 资本输出"
+                ],
+                answer: "D",
+                analysis: "19世纪末资本主义进入帝国主义阶段，资本输出取代商品输出成为殖民剥削的主要形式。"
+            },
+            // 第003题
+            {
+                title: "【多项选择题003】",
+                desc: "近代中国人民的历史任务是（　　）",
+                code: "",
+                options: [
+                    "A. 争取民族独立和人民解放",
+                    "B. 建立民主共和国",
+                    "C. 实现国家富强和人民富裕",
+                    "D. 大力发展资本主义"
+                ],
+                answer: "AC",
+                analysis: "近代中国的两大历史任务是：争取民族独立和人民解放，实现国家富强和人民富裕。"
+            },
+            // 第004题
+            {
+                title: "【多项选择题004】",
+                desc: "改良主义道路在中国走不通的原因在于（　　）",
+                code: "",
+                options: [
+                    "A. 帝国主义不会自动放弃在中国攫取的特权",
+                    "B. 革命是最快解决问题的方式",
+                    "C. 封建势力不会自动放弃自己控制的政权",
+                    "D. 近代的改良主义运动统统失败"
+                ],
+                answer: "AC",
+                analysis: "帝国主义和封建势力都不会自动放弃自己的利益，这是改良主义道路走不通的根本原因。"
+            },
+            // 第005题
+            {
+                title: "【单项选择题005】",
+                desc: "在近代，通过战争向中国勒索赔款最多的国家是（　　）",
+                code: "",
+                options: [
+                    "A. 英国",
+                    "B. 俄国",
+                    "C. 法国",
+                    "D. 日本"
+                ],
+                answer: "D",
+                analysis: "日本通过甲午战争《马关条约》向中国勒索赔款2亿两白银，加上赎辽费3000万两，是近代向中国勒索赔款最多的国家。"
+            },
+            // 第006题
+            {
+                title: "【单项选择题006】",
+                desc: "在近代中国，规定中国向列强支付赔款最多的条约是（　　）",
+                code: "",
+                options: [
+                    "A. 《南京条约》",
+                    "B. 《北京条约》",
+                    "C. 《马关条约》",
+                    "D. 《辛丑条约》"
+                ],
+                answer: "D",
+                analysis: "《辛丑条约》规定中国向列强赔款4.5亿两白银，是近代赔款最多的不平等条约。"
+            },
+            // 第007题
+            {
+                title: "【单项选择题007】",
+                desc: "规定外国人在中国享有领事裁判权的条约是（　　）",
+                code: "",
+                options: [
+                    "A. 《南京条约》",
+                    "B. 《五口通商章程》",
+                    "C. 《望厦条约》",
+                    "D. 《黄埔条约》"
+                ],
+                answer: "B",
+                analysis: "1843年《五口通商章程》首次规定外国人在中国享有领事裁判权。"
+            },
+            // 第008题
+            {
+                title: "【单项选择题008】",
+                desc: "被誉为中国近代睁眼看世界第一人的是（　　）",
+                code: "",
+                options: [
+                    "A. 林则徐",
+                    "B. 魏源",
+                    "C. 李鸿章",
+                    "D. 康有为"
+                ],
+                answer: "A",
+                analysis: "林则徐在鸦片战争期间主持编译《四洲志》，系统介绍西方国家情况，被誉为中国近代睁眼看世界第一人。"
+            },
+            // 第009题
+            {
+                title: "【单项选择题009】",
+                desc: "规定允许外国在中国办工厂的条约是（　　）",
+                code: "",
+                options: [
+                    "A. 《南京条约》",
+                    "B. 《北京条约》",
+                    "C. 《马关条约》",
+                    "D. 《辛丑条约》"
+                ],
+                answer: "C",
+                analysis: "《马关条约》规定允许日本在通商口岸设立工厂，列强援引最惠国待遇同样获得该权利。"
+            },
+            // 第010题
+            {
+                title: "【单项选择题010】",
+                desc: "师夷长技以制夷这一思想出自（　　）",
+                code: "",
+                options: [
+                    "A. 《四洲志》",
+                    "B. 《海国图志》",
+                    "C. 《资政新篇》",
+                    "D. 《盛世危言》"
+                ],
+                answer: "B",
+                analysis: "魏源在《海国图志》中提出师夷长技以制夷的主张，意为学习西方先进技术来抵御西方侵略。"
+            },
+            // 第011题
+            {
+                title: "【单项选择题011】",
+                desc: "1895年，响亮喊出救亡口号的是（　　）",
+                code: "",
+                options: [
+                    "A. 康有为",
+                    "B. 梁启超",
+                    "C. 严复",
+                    "D. 孙中山"
+                ],
+                answer: "C",
+                analysis: "严复在甲午战争后翻译《天演论》，提出救亡口号，唤醒国人危机意识。"
+            },
+            // 第012题
+            {
+                title: "【单项选择题012】",
+                desc: "（　　）翻译的《天演论》中的社会进化论思想，为中国人民的危机意识和民族意识提供了理论根据。",
+                code: "",
+                options: [
+                    "A. 康有为",
+                    "B. 梁启超",
+                    "C. 严复",
+                    "D. 孙中山"
+                ],
+                answer: "C",
+                analysis: "严复翻译赫胥黎的《天演论》，将物竞天择适者生存的思想引入中国。"
+            },
+            // 第013题
+            {
+                title: "【单项选择题013】",
+                desc: "振兴中华的口号的提出者是（　　）",
+                code: "",
+                options: [
+                    "A. 孙中山",
+                    "B. 周恩来",
+                    "C. 鲁迅",
+                    "D. 梁启超"
+                ],
+                answer: "A",
+                analysis: "孙中山在1894年创立兴中会时提出振兴中华的口号。"
+            },
+            // 第014题
+            {
+                title: "【多项选择题014】",
+                desc: "含有赔款内容的不平等条约有（　　）",
+                code: "",
+                options: [
+                    "A. 《南京条约》",
+                    "B. 《北京条约》",
+                    "C. 《马关条约》",
+                    "D. 《辛丑条约》"
+                ],
+                answer: "ABCD",
+                analysis: "以上四个条约均包含巨额赔款内容。"
+            },
+            // 第015题
+            {
+                title: "【多项选择题015】",
+                desc: "早期维新思想的代表人物包括（　　）",
+                code: "",
+                options: [
+                    "A. 林则徐、魏源",
+                    "B. 王韬、薛福成",
+                    "C. 马建忠、郑观应",
+                    "D. 李鸿章、曾国藩"
+                ],
+                answer: "BC",
+                analysis: "早期维新派代表人物主要包括王韬、薛福成、马建忠、郑观应等人，他们主张学习西方制度与技术。"
+            },
+            // 第016题
+            {
+                title: "【单项选择题016】",
+                desc: "太平天国农民战争历时（　　）",
+                code: "",
+                options: [
+                    "A. 10年",
+                    "B. 14年",
+                    "C. 18年",
+                    "D. 20年"
+                ],
+                answer: "B",
+                analysis: "太平天国运动从1851年金田起义到1864年天京陷落，历时14年。"
+            },
+            // 第017题
+            {
+                title: "【单项选择题017】",
+                desc: "洋务运动发端于（　　）",
+                code: "",
+                options: [
+                    "A. 19世纪40年代",
+                    "B. 19世纪60年代",
+                    "C. 19世纪80年代",
+                    "D. 20世纪20年代"
+                ],
+                answer: "B",
+                analysis: "洋务运动发端于19世纪60年代，以自强为口号兴办军事工业。"
+            },
+            // 第018题
+            {
+                title: "【单项选择题018】",
+                desc: "洋务派代表的社会阶层是（　　）",
+                code: "",
+                options: [
+                    "A. 地主阶级",
+                    "B. 官僚资产阶级",
+                    "C. 民族资产阶级",
+                    "D. 农民阶级"
+                ],
+                answer: "A",
+                analysis: "洋务派是地主阶级中的开明派，主张学习西方技术以维护封建统治。"
+            },
+            // 第019题
+            {
+                title: "【单项选择题019】",
+                desc: "19世纪60年代后，洋务派开展洋务运动的指导思想是（　　）",
+                code: "",
+                options: [
+                    "A. 师夷长技以制夷",
+                    "B. 中学为体，西学为用",
+                    "C. 自强、求富",
+                    "D. 托古改制"
+                ],
+                answer: "B",
+                analysis: "洋务运动的指导思想是中学为体西学为用，即在保持封建制度的前提下学习西方技术。"
+            },
+            // 第020题
+            {
+                title: "【单项选择题020】",
+                desc: "洋务派最先兴办的是（　　）",
+                code: "",
+                options: [
+                    "A. 民用工业",
+                    "B. 军事工业",
+                    "C. 新式学堂",
+                    "D. 新式军队"
+                ],
+                answer: "B",
+                analysis: "洋务派以自强为口号，最先兴办军事工业，如江南制造总局等。"
+            },
+            // 第021题
+            {
+                title: "【单项选择题021】",
+                desc: "洋务派创办的民用企业大多数采用（　　）",
+                code: "",
+                options: [
+                    "A. 官办",
+                    "B. 商办",
+                    "C. 官督商办",
+                    "D. 官商合办"
+                ],
+                answer: "C",
+                analysis: "洋务派创办的民用企业大多采用官督商办形式，如轮船招商局等。"
+            },
+            // 第022题
+            {
+                title: "【单项选择题022】",
+                desc: "戊戌维新运动是一次（　　）",
+                code: "",
+                options: [
+                    "A. 资产阶级改良运动",
+                    "B. 资产阶级革命运动",
+                    "C. 地主阶级改良运动",
+                    "D. 地主阶级革命运动"
+                ],
+                answer: "A",
+                analysis: "戊戌维新运动是资产阶级维新派发起的改良运动，希望通过变法实现君主立宪。"
+            },
+            // 第023题
+            {
+                title: "【单项选择题023】",
+                desc: "戊戌维新运动的核心领导人是（　　）",
+                code: "",
+                options: [
+                    "A. 康有为",
+                    "B. 梁启超",
+                    "C. 谭嗣同",
+                    "D. 严复"
+                ],
+                answer: "A",
+                analysis: "康有为是戊戌维新运动的核心领导人，他通过公车上书等方式推动变法。"
+            },
+            // 第024题
+            {
+                title: "【单项选择题024】",
+                desc: "戊戌变法中，表示要为变法而流血牺牲的是（　　）",
+                code: "",
+                options: [
+                    "A. 康有为",
+                    "B. 梁启超",
+                    "C. 谭嗣同",
+                    "D. 严复"
+                ],
+                answer: "C",
+                analysis: "谭嗣同在戊戌政变后拒绝逃亡，慷慨就义。"
+            },
+            // 第025题
+            {
+                title: "【单项选择题025】",
+                desc: "戊戌维新前维新派与守旧派的论战，实质上是（　　）",
+                code: "",
+                options: [
+                    "A. 资产阶级思想与封建主义思想在中国的第一次正面交锋",
+                    "B. 守旧派与洋务派之间的一次论战",
+                    "C. 保皇派与革命派的一次论战",
+                    "D. 帝党与后党的权力之争"
+                ],
+                answer: "A",
+                analysis: "维新派与守旧派的论战是资产阶级思想与封建主义思想在中国的第一次正面交锋。"
+            },
+            // 第026题
+            {
+                title: "【单项选择题026】",
+                desc: "戊戌政变后，新政措施大都被废除，被保留下来的是（　　）",
+                code: "",
+                options: [
+                    "A. 京师大学堂",
+                    "B. 准许旗人自谋生计",
+                    "C. 改革财政",
+                    "D. 改革行政机构"
+                ],
+                answer: "A",
+                analysis: "戊戌政变后大部分改革措施被废止，但京师大学堂得以保留。"
+            },
+            // 第027题
+            {
+                title: "【单项选择题027】",
+                desc: "洋务运动时期，主要培养翻译人才的学校是（　　）",
+                code: "",
+                options: [
+                    "A. 京师大学堂",
+                    "B. 工艺学堂",
+                    "C. 船政学堂",
+                    "D. 京师同文馆"
+                ],
+                answer: "D",
+                analysis: "京师同文馆是洋务运动期间创办的第一所新式学堂，主要培养外语和外交人才。"
+            },
+            // 第028题
+            {
+                title: "【单项选择题028】",
+                desc: "戊戌维新时期，康有为主持的重要学堂是（　　）",
+                code: "",
+                options: [
+                    "A. 京师大学堂",
+                    "B. 广方言语馆",
+                    "C. 时务学堂",
+                    "D. 万木草堂"
+                ],
+                answer: "D",
+                analysis: "万木草堂是康有为在广州设立的讲学场所，是他宣传维新思想培养维新人才的重要基地。"
+            },
+            // 第029题
+            {
+                title: "【单项选择题029】",
+                desc: "下列人员中，不属于戊戌六君子的是（　　）",
+                code: "",
+                options: [
+                    "A. 梁启超",
+                    "B. 杨锐",
+                    "C. 谭嗣同",
+                    "D. 刘光第"
+                ],
+                answer: "A",
+                analysis: "戊戌六君子指谭嗣同、林旭、杨锐、刘光第、康广仁、杨深秀六人，梁启超逃亡日本，不在六君子之列。"
+            },
+            // 第030题
+            {
+                title: "【多项选择题030】",
+                desc: "太平天国的历史意义有（　　）",
+                code: "",
+                options: [
+                    "A. 沉重打击了封建统治阶级，强烈撼动了清政府的统治根基",
+                    "B. 比较完整地表达了千百年来农民对拥有土地的渴望，是中国旧式农民战争的最高峰",
+                    "C. 冲击了孔子和儒家经典的正统权威",
+                    "D. 有力打击了外国侵略势力"
+                ],
+                answer: "ABCD",
+                analysis: "太平天国运动具有深远的历史意义，以上四项均正确。"
+            },
+            // 第031题
+            {
+                title: "【多项选择题031】",
+                desc: "下列人物，属于洋务派的有（　　）",
+                code: "",
+                options: [
+                    "A. 奕䜣",
+                    "B. 李鸿章",
+                    "C. 曾国藩",
+                    "D. 张之洞"
+                ],
+                answer: "ABCD",
+                analysis: "奕䜣、李鸿章、曾国藩、张之洞都是洋务派的主要代表人物。"
+            },
+            // 第032题
+            {
+                title: "【多项选择题032】",
+                desc: "洋务派兴办的洋务事业有（　　）",
+                code: "",
+                options: [
+                    "A. 兴办近代企业",
+                    "B. 建立新式海陆军",
+                    "C. 创办新式学堂，派遣留学生",
+                    "D. 设议院，进行官制改革"
+                ],
+                answer: "ABC",
+                analysis: "洋务派兴办的事业包括兴办近代企业、建立新式海陆军、创办新式学堂等，但不包括设议院。"
+            },
+            // 第033题
+            {
+                title: "【多项选择题033】",
+                desc: "洋务运动具有（　　）等特点。",
+                code: "",
+                options: [
+                    "A. 依赖性",
+                    "B. 封建性",
+                    "C. 洋务企业的管理具有腐朽性",
+                    "D. 革命性"
+                ],
+                answer: "ABC",
+                analysis: "洋务运动具有依赖外国、维护封建统治、管理腐朽等特点，不具有革命性。"
+            },
+            // 第034题
+            {
+                title: "【多项选择题034】",
+                desc: "戊戌维新运动是一场（　　）",
+                code: "",
+                options: [
+                    "A. 爱国救亡运动",
+                    "B. 政治改良运动",
+                    "C. 经济改革运动",
+                    "D. 思想启蒙运动"
+                ],
+                answer: "ABD",
+                analysis: "戊戌维新运动是爱国救亡运动、政治改良运动和思想启蒙运动，其核心不在经济改革。"
+            },
+            // 第035题
+            {
+                title: "【多项选择题035】",
+                desc: "戊戌维新运动的代表人物有（　　）",
+                code: "",
+                options: [
+                    "A. 康有为",
+                    "B. 谭嗣同",
+                    "C. 袁世凯",
+                    "D. 梁启超"
+                ],
+                answer: "ABD",
+                analysis: "袁世凯虽然参与维新但并非维新派核心人物，戊戌政变中他向荣禄告密。"
+            },
+            // 第036题
+            {
+                title: "【多项选择题036】",
+                desc: "顽固派和维新派论战的焦点是（　　）",
+                code: "",
+                options: [
+                    "A. 要不要变法",
+                    "B. 要不要发展资本主义",
+                    "C. 要不要兴民权、设议院，实行君主立宪",
+                    "D. 要不要废八股、改科举和兴西学"
+                ],
+                answer: "ACD",
+                analysis: "论战焦点是要不要变法、要不要兴民权设议院、要不要废八股改科举。发展资本主义不是直接焦点。"
+            },
+            // 第037题
+            {
+                title: "【单项选择题037】",
+                desc: "说三民主义是比较完整的资产阶级民主革命纲领，主要是因为它（　　）",
+                code: "",
+                options: [
+                    "A. 表达了资产阶级在政治和经济上的要求",
+                    "B. 提出了彻底的反帝反封建的革命要求",
+                    "C. 适应了近代中国历史发展的要求",
+                    "D. 提出了平均地权以解决农民土地问题"
+                ],
+                answer: "A",
+                analysis: "三民主义表达了资产阶级在政治和经济上的基本诉求，是较完整的资产阶级革命纲领。"
+            },
+            // 第038题
+            {
+                title: "【单项选择题038】",
+                desc: "1903年邹容写的（　　）是中国近代史上第一部宣传革命和资产阶级共和国思想的著作",
+                code: "",
+                options: [
+                    "A. 《猛回头》",
+                    "B. 《驳康有为论革命书》",
+                    "C. 《革命军》",
+                    "D. 《警世钟》"
+                ],
+                answer: "C",
+                analysis: "邹容的《革命军》是中国近代史上第一部系统宣传资产阶级革命思想和建立共和国主张的著作。"
+            },
+            // 第039题
+            {
+                title: "【单项选择题039】",
+                desc: "中国近代第一个资产阶级革命政党是（　　）",
+                code: "",
+                options: [
+                    "A. 强学会",
+                    "B. 兴中会",
+                    "C. 同盟会",
+                    "D. 国民党"
+                ],
+                answer: "C",
+                analysis: "1905年成立的中国同盟会是近代中国第一个全国性的资产阶级革命政党。"
+            },
+            // 第040题
+            {
+                title: "【单项选择题040】",
+                desc: "清末预备立宪的根本目的在于（　　）",
+                code: "",
+                options: [
+                    "A. 仿效欧美政体",
+                    "B. 发展资本主义",
+                    "C. 延续反动统治",
+                    "D. 缓和阶级矛盾"
+                ],
+                answer: "C",
+                analysis: "清末预备立宪是清政府为维护其统治而采取的权宜之计。"
+            },
+            // 第041题
+            {
+                title: "【单项选择题041】",
+                desc: "1905年11月，孙中山在《民报》发刊词中将中国同盟会的政治纲领概括为（　　）",
+                code: "",
+                options: [
+                    "A. 创立民国、平均地权",
+                    "B. 驱除鞑虏、恢复中华、创立合众政府",
+                    "C. 民族主义、民权主义、民生主义",
+                    "D. 联俄、联共、扶助农工"
+                ],
+                answer: "C",
+                analysis: "孙中山将同盟会纲领概括为民族、民权、民生三大主义，即三民主义。"
+            },
+            // 第042题
+            {
+                title: "【单项选择题042】",
+                desc: "中国历史上第一部具有资产阶级共和国宪法性质的法典是（　　）",
+                code: "",
+                options: [
+                    "A. 《钦定宪法大纲》",
+                    "B. 《中华民国临时约法》",
+                    "C. 《中华民国约法》",
+                    "D. 《训政纲领》"
+                ],
+                answer: "B",
+                analysis: "《中华民国临时约法》于1912年颁布，是中国历史上第一部具有资产阶级共和国宪法性质的法典。"
+            },
+            // 第043题
+            {
+                title: "【单项选择题043】",
+                desc: "辛亥革命取得的最大成就是（　　）",
+                code: "",
+                options: [
+                    "A. 推翻了封建帝制",
+                    "B. 促进了资本主义的发展",
+                    "C. 使人民获得了一些民主自由权利",
+                    "D. 打击了帝国主义的殖民势力"
+                ],
+                answer: "A",
+                analysis: "辛亥革命的最大历史功绩是推翻了清王朝，结束了中国两千多年的封建君主专制制度。"
+            },
+            // 第044题
+            {
+                title: "【单项选择题044】",
+                desc: "下列关于辛亥革命历史意义的表述，不正确的一项是（　　）",
+                code: "",
+                options: [
+                    "A. 推翻了清王朝，结束了中国两千多年的封建制度",
+                    "B. 打击了帝国主义侵略势力，使其难以在中国建立稳定的统治秩序",
+                    "C. 为民族资本主义的发展创造了条件",
+                    "D. 使民主共和观念深入人心"
+                ],
+                answer: "A",
+                analysis: "辛亥革命推翻了清王朝，结束了中国两千多年的封建君主专制"
+            },
+            // 第045题
+            {
+                title: "【单项选择题045】",
+                desc: "辛亥革命的失败是指（　　）",
+                code: "",
+                options: [
+                    "A. 没有完成反帝反封建的任务",
+                    "B. 没有推翻清政府的统治",
+                    "C. 没有打击帝国主义的在华势力",
+                    "D. 没有促进中国革命的向前发展"
+                ],
+                answer: "A",
+                analysis: "辛亥革命虽然推翻了清王朝，但未能彻底完成反帝反封建的革命任务。"
+            },
+            // 第046题
+            {
+                title: "【单项选择题046】",
+                desc: "在1840年至1919年期间，比较完全意义上的资产阶级民主革命是（　　）",
+                code: "",
+                options: [
+                    "A. 辛亥革命",
+                    "B. 戊戌变法",
+                    "C. 太平天国运动",
+                    "D. 义和团运动"
+                ],
+                answer: "A",
+                analysis: "辛亥革命是近代中国第一次完全意义上的资产阶级民主革命。"
+            },
+            // 第047题
+            {
+                title: "【单项选择题047】",
+                desc: "辛亥革命的中坚力量是（　　）",
+                code: "",
+                options: [
+                    "A. 资产阶级工商业者",
+                    "B. 华侨",
+                    "C. 会党",
+                    "D. 以留学生为骨干的青年知识分子"
+                ],
+                answer: "D",
+                analysis: "以留学生为骨干的青年知识分子是辛亥革命的中坚力量。"
+            },
+            // 第048题
+            {
+                title: "【单项选择题048】",
+                desc: "中国资产阶级领导的变法与革命失败的根本原因是（　　）",
+                code: "",
+                options: [
+                    "A. 传统儒家思想的影响",
+                    "B. 封建顽固势力的强大",
+                    "C. 帝国主义的破坏",
+                    "D. 民族资产阶级自身的软弱性和妥协性"
+                ],
+                answer: "D",
+                analysis: "民族资产阶级自身的软弱性和妥协性是失败的根本原因。"
+            },
+            // 第049题
+            {
+                title: "【多项选择题049】",
+                desc: "清末新政的内容包括（　　）",
+                code: "",
+                options: [
+                    "A. 设立商部、学部、巡警部等中央行政机构",
+                    "B. 裁撤绿营，建立新军",
+                    "C. 颁布商法商律，奖励工商",
+                    "D. 颁布新的学制"
+                ],
+                answer: "ABCD",
+                analysis: "清末新政内容广泛，以上四项均正确。"
+            },
+            // 第050题
+            {
+                title: "【多项选择题050】",
+                desc: "在资产阶级革命思想的传播过程中，陆续成立的革命团体有（　　）",
+                code: "",
+                options: [
+                    "A. 华兴会",
+                    "B. 科学补习所",
+                    "C. 光复会",
+                    "D. 岳王会"
+                ],
+                answer: "ABCD",
+                analysis: "华兴会、科学补习所、光复会、岳王会等均为辛亥革命前的革命团体。"
+            },
+            // 第051题
+            {
+                title: "【多项选择题051】",
+                desc: "同盟会的政治纲领是（　　）",
+                code: "",
+                options: [
+                    "A. 驱除鞑虏",
+                    "B. 恢复中华",
+                    "C. 创立民国",
+                    "D. 平均地权"
+                ],
+                answer: "ABCD",
+                analysis: "同盟会政治纲领为驱除鞑虏、恢复中华、创立民国、平均地权十六字纲领。"
+            },
+            // 第052题
+            {
+                title: "【多项选择题052】",
+                desc: "《临时约法》的内容包括（　　）",
+                code: "",
+                options: [
+                    "A. 中华民国主权属于国民全体",
+                    "B. 国内各民族一律平等",
+                    "C. 参议院对临时大总统有弹劾权",
+                    "D. 增设国务总理，作为政府首脑"
+                ],
+                answer: "ABCD",
+                analysis: "《中华民国临时约法》规定了主权在民、民族平等、三权分立等内容。"
+            },
+            // 第053题
+            {
+                title: "【多项选择题053】",
+                desc: "1905年至1907年间，资产阶级革命派与改良派论战的主要议题是（　　）",
+                code: "",
+                options: [
+                    "A. 要不要以革命手段推翻清王朝",
+                    "B. 要不要推翻帝制，实行共和",
+                    "C. 要不要社会革命",
+                    "D. 要不要废科举和兴西学"
+                ],
+                answer: "ABC",
+                analysis: "论战主要围绕要不要革命、要不要共和、要不要社会革命三个问题展开。"
+            },
+            // 第054题
+            {
+                title: "【多项选择题054】",
+                desc: "辛亥革命失败的原因主要包括（　　）",
+                code: "",
+                options: [
+                    "A. 没有彻底的反帝反封建纲领",
+                    "B. 不能充分发动和依靠群众",
+                    "C. 不能建立坚强的革命政党",
+                    "D. 中外反动势力勾结，过于强大"
+                ],
+                answer: "ABCD",
+                analysis: "辛亥革命失败有多方面原因，以上四项均正确。"
+            },
+            // 第055题
+            {
+                title: "【单项选择题055】",
+                desc: "新文化运动兴起的标志是（　　）",
+                code: "",
+                options: [
+                    "A. 辛亥革命",
+                    "B. 戊戌维新运动",
+                    "C. 陈独秀创办《青年杂志》",
+                    "D. 义和团运动"
+                ],
+                answer: "C",
+                analysis: "1915年陈独秀在上海创办《青年杂志》（后改名《新青年》），标志着新文化运动的兴起。"
+            },
+            // 第056题
+            {
+                title: "【单项选择题056】",
+                desc: "新文化运动对中国革命产生的最深刻的影响是（　　）",
+                code: "",
+                options: [
+                    "A. 动摇封建思想的统治地位",
+                    "B. 弘扬了民主和科学",
+                    "C. 对五四运动的爆发起了宣传作用",
+                    "D. 后期传播社会主义思想，成为知识分子拯救国家改造社会的思想武器"
+                ],
+                answer: "D",
+                analysis: "新文化运动后期马克思主义开始在中国广泛传播，成为先进知识分子救国救民的思想武器。"
+            },
+            // 第057题
+            {
+                title: "【单项选择题057】",
+                desc: "在20世纪第二个十年，堪称中国历史转折之里程碑的是（　　）",
+                code: "",
+                options: [
+                    "A. 武昌起义、中华民国建立",
+                    "B. 《新青年》创办、武昌起义",
+                    "C. 五四运动、《新青年》创办",
+                    "D. 中华民国建立、五四运动"
+                ],
+                answer: "D",
+                analysis: "中华民国的建立标志着封建帝制的终结，五四运动开启了新民主主义革命的序幕。"
+            },
+            // 第058题
+            {
+                title: "【单项选择题058】",
+                desc: "最能体现五四运动性质的口号是（　　）",
+                code: "",
+                options: [
+                    "A. 废除二十一条",
+                    "B. 还我青岛",
+                    "C. 外争国权，内惩国贼",
+                    "D. 拒绝在和约上签字"
+                ],
+                answer: "C",
+                analysis: "外争国权内惩国贼全面体现了五四运动反帝反封建的双重性质。"
+            },
+            // 第059题
+            {
+                title: "【单项选择题059】",
+                desc: "在中国大地上率先举起马克思主义旗帜的是（　　）",
+                code: "",
+                options: [
+                    "A. 李大钊",
+                    "B. 陈独秀",
+                    "C. 张国焘",
+                    "D. 毛泽东"
+                ],
+                answer: "A",
+                analysis: "李大钊是中国最早系统宣传马克思主义的思想家，在《新青年》上发表《我的马克思主义观》。"
+            },
+            // 第060题
+            {
+                title: "【单项选择题060】",
+                desc: "标志着中国新民主主义革命开端的是（　　）",
+                code: "",
+                options: [
+                    "A. 新文化运动",
+                    "B. 五四运动",
+                    "C. 中国共产党的诞生",
+                    "D. 辛亥革命"
+                ],
+                answer: "B",
+                analysis: "五四运动是一场彻底反帝反封建的伟大爱国革命运动，标志着中国新民主主义革命的开端。"
+            },
+            // 第061题
+            {
+                title: "【单项选择题061】",
+                desc: "代表上海中国共产党的早期组织的机关理论刊物是（　　）",
+                code: "",
+                options: [
+                    "A. 《共产党》",
+                    "B. 《劳动界》",
+                    "C. 《新青年》",
+                    "D. 《劳动音》"
+                ],
+                answer: "C",
+                analysis: "《新青年》是上海共产党的早期组织的机关理论刊物。"
+            },
+            // 第062题
+            {
+                title: "【单项选择题062】",
+                desc: "中国共产党第一次提出明确的反帝反封建的民主革命纲领是在（　　）",
+                code: "",
+                options: [
+                    "A. 《新青年》创刊号上",
+                    "B. 中共一大会议上",
+                    "C. 中共二大会议上",
+                    "D. 中共三大会议上"
+                ],
+                answer: "C",
+                analysis: "中共二大于1922年召开，首次明确提出彻底的反帝反封建的民主革命纲领。"
+            },
+            // 第063题
+            {
+                title: "【单项选择题063】",
+                desc: "中国共产党正式决定与国民党合作是在（　　）",
+                code: "",
+                options: [
+                    "A. 中共一大",
+                    "B. 中共二大",
+                    "C. 二七罢工后",
+                    "D. 中共三大"
+                ],
+                answer: "D",
+                analysis: "1923年中共三大正式决定共产党员以个人身份加入国民党，实现国共合作。"
+            },
+            // 第064题
+            {
+                title: "【单项选择题064】",
+                desc: "革命统一战线正式建立的标志是（　　）",
+                code: "",
+                options: [
+                    "A. 国民党一大的召开",
+                    "B. 国民党改组",
+                    "C. 三民主义发展为新三民主义",
+                    "D. 中共三大的召开"
+                ],
+                answer: "A",
+                analysis: "1924年国民党一大的召开，标志着以国共合作为基础的革命统一战线正式建立。"
+            },
+            // 第065题
+            {
+                title: "【单项选择题065】",
+                desc: "新三民主义之所以成为第一次国共合作的政治基础，主要原因是（　　）",
+                code: "",
+                options: [
+                    "A. 它与中国共产党的最高纲领一致",
+                    "B. 它适应了时代发展的潮流",
+                    "C. 它与中共的民主革命完全一致",
+                    "D. 它与中共民主革命纲领若干原则一致"
+                ],
+                answer: "D",
+                analysis: "新三民主义与中共民主革命纲领在若干原则上基本一致，成为国共合作的政治基础。"
+            },
+            // 第066题
+            {
+                title: "【多项选择题066】",
+                desc: "新文化运动的主要阵地有（　　）",
+                code: "",
+                options: [
+                    "A. 《新青年》杂志",
+                    "B. 《时务报》",
+                    "C. 《中外纪闻》",
+                    "D. 北京大学"
+                ],
+                answer: "AD",
+                analysis: "《新青年》杂志和北京大学是新文化运动的主要阵地。"
+            },
+            // 第067题
+            {
+                title: "【多项选择题067】",
+                desc: "五四运动与以往的民主主义革命的显著区别是（　　）",
+                code: "",
+                options: [
+                    "A. 有广泛的群众基础",
+                    "B. 促进了马克思主义在中国的传播及其与中国工人运动的结合",
+                    "C. 工人阶级显示了伟大力量",
+                    "D. 具有彻底的反帝反封建性"
+                ],
+                answer: "ABCD",
+                analysis: "五四运动具有广泛的群众基础、促进了马克思主义传播、工人阶级登上历史舞台，具有彻底的反帝反封建性。"
+            },
+            // 第068题
+            {
+                title: "【多项选择题068】",
+                desc: "五四运动后，马克思主义在中国传播的特点是（　　）",
+                code: "",
+                options: [
+                    "A. 进步知识分子起了推动作用",
+                    "B. 马克思主义宣传与工人运动相结合",
+                    "C. 马克思主义同非马克思主义展开斗争",
+                    "D. 马克思主义成为新文化运动的主流"
+                ],
+                answer: "ABCD",
+                analysis: "五四运动后马克思主义在中国传播具有以上四个特点。"
+            },
+            // 第069题
+            {
+                title: "【多项选择题069】",
+                desc: "中共二大制定的当前阶段的民主革命纲领包括（　　）",
+                code: "",
+                options: [
+                    "A. 打倒军阀",
+                    "B. 推翻帝国主义压迫",
+                    "C. 实现共产主义",
+                    "D. 统一中国为真正的民主共和国"
+                ],
+                answer: "ABD",
+                analysis: "中共二大最低纲领：打倒军阀、推翻帝国主义压迫、统一中国为真正的民主共和国。实现共产主义是最高纲领。"
+            },
+            // 第070题
+            {
+                title: "【多项选择题070】",
+                desc: "第一次国共合作得以实现的条件有（　　）",
+                code: "",
+                options: [
+                    "A. 中国共产党需要团结各种力量作为革命同盟军",
+                    "B. 中国国民党在当时各政党中比较是革命的民主派",
+                    "C. 共产国际提出了实行国共合作的建议",
+                    "D. 打倒列强除军阀成为全国人民的共同愿望"
+                ],
+                answer: "ABCD",
+                analysis: "第一次国共合作的实现是多种因素共同作用的结果，以上四项均正确。"
+            },
+            // 第071题
+            {
+                title: "【单项选择题071】",
+                desc: "五四运动是（　　）的伟大开端。",
+                code: "",
+                options: [
+                    "A. 中国近代史",
+                    "B. 中国现代史",
+                    "C. 中华人民共和国史",
+                    "D. 中国新民主主义革命"
+                ],
+                answer: "D",
+                analysis: "五四运动是中国新民主主义革命的伟大开端。"
+            },
+            // 第072题
+            {
+                title: "【单项选择题072】",
+                desc: "民族资产阶级在中国新民主主义革命中（　　）",
+                code: "",
+                options: [
+                    "A. 属于革命对象",
+                    "B. 属于革命领导阶级",
+                    "C. 属于革命力量",
+                    "D. 什么都不是"
+                ],
+                answer: "C",
+                analysis: "民族资产阶级具有两面性，在新民主主义革命中属于革命力量之一。"
+            },
+            // 第073题
+            {
+                title: "【单项选择题073】",
+                desc: "中国新民主主义革命的前途是（　　）",
+                code: "",
+                options: [
+                    "A. 资本主义",
+                    "B. 社会主义",
+                    "C. 封建主义",
+                    "D. 帝国主义"
+                ],
+                answer: "B",
+                analysis: "中国新民主主义革命的前途是社会主义，这是由无产阶级领导决定的。"
+            },
+            // 第074题
+            {
+                title: "【单项选择题074】",
+                desc: "在1921年至1949年期间，中国存在着三种主要的政治力量，其中作为中间势力的是（　　）",
+                code: "",
+                options: [
+                    "A. 官僚资产阶级",
+                    "B. 民族资产阶级",
+                    "C. 城市小资产阶级",
+                    "D. 农民阶级"
+                ],
+                answer: "B",
+                analysis: "民族资产阶级是中间势力，官僚资产阶级是革命对象，工农是进步势力。"
+            },
+            // 第075题
+            {
+                title: "【单项选择题075】",
+                desc: "中国近现代历史上第一次明确提出了反帝反封建的民主革命纲领的是（　　）",
+                code: "",
+                options: [
+                    "A. 辛亥革命",
+                    "B. 五四运动",
+                    "C. 中共一大",
+                    "D. 中共二大"
+                ],
+                answer: "D",
+                analysis: "中共二大首次明确提出彻底的反帝反封建的民主革命纲领。"
+            },
+            // 第076题
+            {
+                title: "【单项选择题076】",
+                desc: "从总体上看，近代中国人民救国方案的探索（　　）",
+                code: "",
+                options: [
+                    "A. 是失败的，但这种探索的精神值得颂扬",
+                    "B. 尽管最终是失败，但推动了近代社会的进步",
+                    "C. 以反帝反封建为号召，在帝国主义、封建主义的联合进攻下失败",
+                    "D. 尽管曲折，但最终找到了一条正确的救国道路"
+                ],
+                answer: "D",
+                analysis: "在中国共产党的领导下，中国人民最终找到了新民主主义革命的正确道路。"
+            },
+            // 第077题
+            {
+                title: "【单项选择题077】",
+                desc: "1931年九一八事变后日本侵略者占领了（　　）",
+                code: "",
+                options: [
+                    "A. 中国东北地区",
+                    "B. 中国华北地区",
+                    "C. 南京",
+                    "D. 东南亚"
+                ],
+                answer: "A",
+                analysis: "1931年九一八事变后，日本迅速侵占中国东北三省，建立伪满洲国。"
+            },
+            // 第078题
+            {
+                title: "【单项选择题078】",
+                desc: "中国人是从（　　）开始真正了解马克思主义的。",
+                code: "",
+                options: [
+                    "A. 新文化运动后",
+                    "B. 五四运动后",
+                    "C. 辛亥革命后",
+                    "D. 俄国十月革命后"
+                ],
+                answer: "D",
+                analysis: "俄国十月革命胜利后，马克思主义传入中国并被先进知识分子接受。"
+            },
+            // 第079题
+            {
+                title: "【单项选择题079】",
+                desc: "1919年以后中国反帝反封建革命斗争的领导力量是（　　）",
+                code: "",
+                options: [
+                    "A. 小资产阶级",
+                    "B. 工人阶级",
+                    "C. 农民阶级",
+                    "D. 民族资产阶级"
+                ],
+                answer: "B",
+                analysis: "五四运动后，工人阶级登上历史舞台，成为中国革命的领导阶级。"
+            },
+            // 第080题
+            {
+                title: "【多项选择题080】",
+                desc: "中国革命要推翻的三座大山是（　　）",
+                code: "",
+                options: [
+                    "A. 帝国主义",
+                    "B. 资本主义",
+                    "C. 封建主义",
+                    "D. 官僚资本主义"
+                ],
+                answer: "ACD",
+                analysis: "中国新民主主义革命的主要任务是推翻帝国主义、封建主义和官僚资本主义三座大山。"
+            },
+            // 第081题
+            {
+                title: "【多项选择题081】",
+                desc: "中国近代史上的三种建国方案是（　　）",
+                code: "",
+                options: [
+                    "A. 地主阶级与买办性的大资产阶级的方案",
+                    "B. 民族资产阶级的方案",
+                    "C. 工人阶级和其他进步势力的方案",
+                    "D. 英美资产阶级的方案"
+                ],
+                answer: "ABC",
+                analysis: "中国近代史上存在三种建国方案，不包括英美资产阶级的方案。"
+            },
+            // 第082题
+            {
+                title: "【多项选择题082】",
+                desc: "在1921年至1949年期间，中国存在着三种主要的政治力量是（　　）",
+                code: "",
+                options: [
+                    "A. 地主阶级和买办性的大资产阶级",
+                    "B. 民族资产阶级",
+                    "C. 外国帝国主义",
+                    "D. 工人阶级、农民阶级和城市小资产阶级"
+                ],
+                answer: "ABD",
+                analysis: "三种主要的政治力量是：地主阶级和买办性的大资产阶级、民族资产阶级、工农和城市小资产阶级。"
+            },
+            // 第083题
+            {
+                title: "【多项选择题083】",
+                desc: "资产阶级共和国的方案之所以行不通的原因主要是（　　）",
+                code: "",
+                options: [
+                    "A. 力量过于软弱",
+                    "B. 没有勇气和能力去领导人民进行彻底反帝反封建的革命斗争",
+                    "C. 提不出彻底的土地革命的纲领",
+                    "D. 不敢进行革命的武装斗争"
+                ],
+                answer: "ABCD",
+                analysis: "资产阶级共和国方案行不通有多方面原因，以上四项均正确。"
+            },
+            // 第084题
+            {
+                title: "【多项选择题084】",
+                desc: "中国新民主主义革命必须实现的主要任务（　　）",
+                code: "",
+                options: [
+                    "A. 反对帝国主义",
+                    "B. 反对封建主义，进行土地制度的彻底改革",
+                    "C. 反对官僚资本主义",
+                    "D. 建立社会主义国家"
+                ],
+                answer: "ABC",
+                analysis: "新民主主义革命的主要任务是反帝反封建反官僚资本主义。"
+            },
+            // 第085题
+            {
+                title: "【单项选择题085】",
+                desc: "1927年9月9日，毛泽东领导的著名起义是（　　）",
+                code: "",
+                options: [
+                    "A. 湘赣边界秋收起义",
+                    "B. 赣南秋收起义",
+                    "C. 湘南秋收起义",
+                    "D. 广州起义"
+                ],
+                answer: "A",
+                analysis: "1927年9月9日，毛泽东发动了湘赣边界秋收起义。"
+            },
+            // 第086题
+            {
+                title: "【多项选择题086】",
+                desc: "毛泽东提出工农武装割据思想的著作是（　　）",
+                code: "",
+                options: [
+                    "A. 《中国的红色政权为什么能够存在？》",
+                    "B. 《井冈山的斗争》",
+                    "C. 《星星之火，可以燎原》",
+                    "D. 《新民主主义论》"
+                ],
+                answer: "BC",
+                analysis: "毛泽东在《井冈山的斗争》、《星星之火，可以燎原》中提出了工农武装割据的思想。"
+            },
+            // 第087题
+            {
+                title: "【单项选择题087】",
+                desc: "中国共产党认识和把握中国革命发展的客观规律，最终要靠（　　）",
+                code: "",
+                options: [
+                    "A. 马克思列宁主义基本原理与中国实际相结合",
+                    "B. 马克思主义本本",
+                    "C. 听从共产国际的指挥",
+                    "D. 照搬苏联经验"
+                ],
+                answer: "A",
+                analysis: "最终要靠把马克思列宁主义基本原理与中国实际相结合。"
+            },
+            // 第088题
+            {
+                title: "【单项选择题088】",
+                desc: "1930年5月，毛泽东写了（　　）一文，阐明了实事求是、理论与实际相结合原则的极端重要性。",
+                code: "",
+                options: [
+                    "A. 《中国革命战争的战略》",
+                    "B. 《中国革命和中国共产党》",
+                    "C. 《反对本本主义》",
+                    "D. 《中国的红色政权为什么能够存在？》"
+                ],
+                answer: "C",
+                analysis: "毛泽东在《反对本本主义》中提出没有调查就没有发言权的著名论断。"
+            },
+            // 第089题
+            {
+                title: "【单项选择题089】",
+                desc: "中共领导革命武装建立的全国第一个农村革命根据地是（　　）",
+                code: "",
+                options: [
+                    "A. 湘赣根据地",
+                    "B. 井冈山根据地",
+                    "C. 湘鄂西根据地",
+                    "D. 陕甘宁根据地"
+                ],
+                answer: "B",
+                analysis: "井冈山根据地是中共领导建立的全国第一个农村革命根据地。"
+            },
+            // 第090题
+            {
+                title: "【单项选择题090】",
+                desc: "以毛泽东为代表的中国共产党人在农村革命根据地实行土地改革的第一次伟大尝试是颁布了（　　）",
+                code: "",
+                options: [
+                    "A. 《井冈山土地法》",
+                    "B. 《兴国土地法》",
+                    "C. 《五四指示》",
+                    "D. 《中国土地法大纲》"
+                ],
+                answer: "A",
+                analysis: "1928年12月颁布的《井冈山土地法》是土地改革的第一次伟大尝试。"
+            },
+            // 第091题
+            {
+                title: "【单项选择题091】",
+                desc: "将以前没收一切土地改为没收一切公共土地及地主阶级的土地的土地法是（　　）",
+                code: "",
+                options: [
+                    "A. 《井冈山土地法》",
+                    "B. 《兴国土地法》",
+                    "C. 《五四指示》",
+                    "D. 《中国土地法大纲》"
+                ],
+                answer: "B",
+                analysis: "《兴国土地法》将没收一切土地改为没收公共土地及地主阶级的土地。"
+            },
+            // 第092题
+            {
+                title: "【单项选择题092】",
+                desc: "土地革命的目的是消灭封建地主的土地私有制，使土地归（　　）所有。",
+                code: "",
+                options: [
+                    "A. 农民",
+                    "B. 政府",
+                    "C. 无产阶级",
+                    "D. 资产阶级"
+                ],
+                answer: "A",
+                analysis: "土地革命的目标是废除封建土地所有制，将土地分配给农民，实现耕者有其田。"
+            },
+            // 第093题
+            {
+                title: "【单项选择题093】",
+                desc: "中国民主革命的基本问题是（　　）",
+                code: "",
+                options: [
+                    "A. 武装斗争问题",
+                    "B. 党的建设问题",
+                    "C. 农民问题",
+                    "D. 统一战线问题"
+                ],
+                answer: "C",
+                analysis: "毛泽东指出农民是中国革命的主力军，农民问题是中国民主革命的基本问题。"
+            },
+            // 第094题
+            {
+                title: "【多项选择题094】",
+                desc: "毛泽东在1928年至1930年发表的阐述农村包围城市、武装夺取政权的革命道路理论的著作有（　　）",
+                code: "",
+                options: [
+                    "A. 《中国的红色政权为什么能够存在？》",
+                    "B. 《井冈山的斗争》",
+                    "C. 《星星之火，可以燎原》",
+                    "D. 《反对本本主义》"
+                ],
+                answer: "ABCD",
+                analysis: "这四部著作系统阐述了农村包围城市、武装夺取政权的革命道路。"
+            },
+            // 第095题
+            {
+                title: "【多项选择题095】",
+                desc: "1928年12月至1929年4月，毛泽东主持制定的土地法有（　　）",
+                code: "",
+                options: [
+                    "A. 《中华苏维埃共和国土地法》",
+                    "B. 《土地法大纲》",
+                    "C. 《井冈山土地法》",
+                    "D. 《兴国土地法》"
+                ],
+                answer: "CD",
+                analysis: "《井冈山土地法》(1928.12)和《兴国土地法》(1929.4)均为毛泽东主持制定。"
+            },
+            // 第096题
+            {
+                title: "【多项选择题096】",
+                desc: "土地革命中所采用的正确的土地分配方法有（　　）",
+                code: "",
+                options: [
+                    "A. 以乡为单位，按人口平分土地",
+                    "B. 在原耕地的基础上，抽多补少，抽肥补瘦",
+                    "C. 地主不分田",
+                    "D. 富农分坏田"
+                ],
+                answer: "AB",
+                analysis: "正确的分配方法是按人口平分土地和抽多补少、抽肥补瘦。地主富农也应分得部分土地。"
+            },
+            // 第097题
+            {
+                title: "【多项选择题097】",
+                desc: "标志毛泽东思想初步形成的著作主要有（　　）",
+                code: "",
+                options: [
+                    "A. 《中国的红色政权为什么能够存在？》",
+                    "B. 《井冈山的斗争》",
+                    "C. 《星星之火，可以燎原》",
+                    "D. 《反对本本主义》"
+                ],
+                answer: "ABCD",
+                analysis: "这四部著作标志着毛泽东思想的初步形成。"
+            },
+            // 第098题
+            {
+                title: "【单项选择题098】",
+                desc: "全国抗战爆发后，国民党正面战场取得的第一个大的胜利是（　　）",
+                code: "",
+                options: [
+                    "A. 平型关战役",
+                    "B. 台儿庄战役",
+                    "C. 豫湘桂战役",
+                    "D. 枣宜战役"
+                ],
+                answer: "B",
+                analysis: "台儿庄战役是1938年国民党正面战场取得的首次大捷。平型关战役是共产党领导的敌后战场首胜。"
+            },
+            // 第099题
+            {
+                title: "【单项选择题099】",
+                desc: "全国抗战爆发后，共产党领导的敌后战场取得的第一个大的胜利是（　　）",
+                code: "",
+                options: [
+                    "A. 平型关战役",
+                    "B. 台儿庄战役",
+                    "C. 豫湘桂战役",
+                    "D. 枣宜战役"
+                ],
+                answer: "A",
+                analysis: "平型关战役是1937年八路军115师取得的胜利，是抗战以来中国军队首次大捷。"
+            },
+            // 第100题
+            {
+                title: "【单项选择题100】",
+                desc: "1938年5月至6月间，毛泽东发表的揭示抗日战争发展规律的著作是（　　）",
+                code: "",
+                options: [
+                    "A. 《论反对日本帝国主义的策略》",
+                    "B. 《论持久战》",
+                    "C. 《中国共产党在民族战争中的地位》",
+                    "D. 《抗日游击战争的战略问题》"
+                ],
+                answer: "B",
+                analysis: "毛泽东在《论持久战》中系统阐述了抗日战争的持久性战略和三个阶段。"
+            },
+            // 第101题
+            {
+                title: "【单项选择题101】",
+                desc: "抗日战争进入相持阶段的时间是（　　）",
+                code: "",
+                options: [
+                    "A. 1937年7月",
+                    "B. 1938年5月",
+                    "C. 1938年10月",
+                    "D. 1941年12月"
+                ],
+                answer: "C",
+                analysis: "1938年10月广州、武汉失守后，抗战进入战略相持阶段。"
+            },
+            // 第102题
+            {
+                title: "【单项选择题102】",
+                desc: "毛泽东论述新民主主义革命三大法宝的著作是（　　）",
+                code: "",
+                options: [
+                    "A. 《中国革命和中国共产党》",
+                    "B. 《〈共产党人〉发刊词》",
+                    "C. 《新民主主义论》",
+                    "D. 《论持久战》"
+                ],
+                answer: "B",
+                analysis: "毛泽东在《〈共产党人〉发刊词》中提出统一战线、武装斗争、党的建设是三大法宝。"
+            },
+            // 第103题
+            {
+                title: "【单项选择题103】",
+                desc: "延安整风运动最主要的任务是（　　）",
+                code: "",
+                options: [
+                    "A. 反对主观主义以整顿学风",
+                    "B. 反对宗派主义以整顿党风",
+                    "C. 反对党八股以整顿文风",
+                    "D. 反对官僚主义以整顿作风"
+                ],
+                answer: "A",
+                analysis: "延安整风最主要的是反对主观主义以整顿学风，关系到党的思想路线问题。"
+            },
+            // 第104题
+            {
+                title: "【单项选择题104】",
+                desc: "以国共合作为基础的抗日民族统一战线正式形成的标志是（　　）",
+                code: "",
+                options: [
+                    "A. 西安事变的和平解决",
+                    "B. 国民党五届三中全会确定实行联共政策",
+                    "C. 国民党公布合作宣言和蒋介石发表承认中共合法地位的谈话",
+                    "D. 周恩来等在庐山同蒋介石谈判"
+                ],
+                answer: "C",
+                analysis: "1937年9月国民党公布合作宣言和蒋介石发表谈话，标志着抗日民族统一战线正式形成。"
+            },
+            // 第105题
+            {
+                title: "【单项选择题105】",
+                desc: "抗日战争时期，中国共产党解决农民问题的基本政策是（　　）",
+                code: "",
+                options: [
+                    "A. 土地国有",
+                    "B. 没收地主土地",
+                    "C. 减租减息",
+                    "D. 按人口平均分配土地"
+                ],
+                answer: "C",
+                analysis: "抗战时期中共实行减租减息政策，既减轻农民负担又团结地主抗日。"
+            },
+            // 第106题
+            {
+                title: "【单项选择题106】",
+                desc: "抗日战争时期，根据地政权的民主建设主要体现为（　　）",
+                code: "",
+                options: [
+                    "A. 建立中华苏维埃共和国",
+                    "B. 实行三三制原则",
+                    "C. 开展整风运动",
+                    "D. 推行精兵简政政策"
+                ],
+                answer: "B",
+                analysis: "三三制原则是抗战时期根据地政权民主建设的重要体现。"
+            },
+            // 第107题
+            {
+                title: "【单项选择题107】",
+                desc: "中国共产党领导的民主政权实行三三制原则是在（　　）",
+                code: "",
+                options: [
+                    "A. 解放战争时期",
+                    "B. 抗日战争时期",
+                    "C. 土地革命时期",
+                    "D. 大革命时期"
+                ],
+                answer: "B",
+                analysis: "三三制原则是抗日战争时期根据地政权建设的重要原则。"
+            },
+            // 第108题
+            {
+                title: "【多项选择题108】",
+                desc: "抗战初期国民党正面战场上组织的会战是（　　）",
+                code: "",
+                options: [
+                    "A. 忻口会战",
+                    "B. 淞沪会战",
+                    "C. 徐州会战",
+                    "D. 武汉会战"
+                ],
+                answer: "ABCD",
+                analysis: "抗战初期国民党正面战场组织了多次大规模会战，以上四项均正确。"
+            },
+            // 第109题
+            {
+                title: "【多项选择题109】",
+                desc: "以国共两党第二次合作为基础的抗日民族统一战线正式形成的标志是（　　）",
+                code: "",
+                options: [
+                    "A. 1937年国民党五届三中全会",
+                    "B. 1937年蒋介石发表承认共产党合法地位的谈话",
+                    "C. 国民党中央通讯社发表《中国共产党为公布国共合作宣言》",
+                    "D. 西安事变的和平解决"
+                ],
+                answer: "BC",
+                analysis: "1937年9月国民党公布合作宣言和蒋介石发表谈话标志着抗日民族统一战线正式形成。"
+            },
+            // 第110题
+            {
+                title: "【多项选择题110】",
+                desc: "中国共产党在中国革命中战胜敌人的三个主要法宝是（　　）",
+                code: "",
+                options: [
+                    "A. 独立自主",
+                    "B. 统一战线",
+                    "C. 武装斗争",
+                    "D. 党的建设"
+                ],
+                answer: "BCD",
+                analysis: "三大法宝是统一战线、武装斗争、党的建设。独立自主是毛泽东思想活的灵魂之一。"
+            },
+            // 第111题
+            {
+                title: "【多项选择题111】",
+                desc: "在20世纪30年代后期和40年代前期，毛泽东论述新民主主义革命理论的著作有（　　）",
+                code: "",
+                options: [
+                    "A. 《论持久战》",
+                    "B. 《〈共产党人〉的发刊词》",
+                    "C. 《中国革命和中国共产党》",
+                    "D. 《新民主主义论》"
+                ],
+                answer: "BCD",
+                analysis: "《〈共产党人〉的发刊词》《中国革命和中国共产党》《新民主主义论》是毛泽东论述新民主主义革命理论的主要著作。"
+            },
+            // 第112题
+            {
+                title: "【多项选择题112】",
+                desc: "毛泽东在《新民主主义论》中提出了党关于新民主主义革命的三大纲领是（　　）",
+                code: "",
+                options: [
+                    "A. 政治纲领",
+                    "B. 经济纲领",
+                    "C. 军事纲领",
+                    "D. 文化纲领"
+                ],
+                answer: "ABD",
+                analysis: "三大纲领是政治纲领、经济纲领和文化纲领，不包括军事纲领。"
+            },
+            // 第113题
+            {
+                title: "【单项选择题113】",
+                desc: "《双十协定》的签订，中共取得的战略优势是（　　）",
+                code: "",
+                options: [
+                    "A. 获得了自卫战争的准备时间",
+                    "B. 解放区获得了合法地位",
+                    "C. 赢得了民主党派的支持",
+                    "D. 取得了政治上的主动地位"
+                ],
+                answer: "D",
+                analysis: "《双十协定》的签订使中共在政治上取得了主动地位。"
+            },
+            // 第114题
+            {
+                title: "【单项选择题114】",
+                desc: "重庆谈判的焦点问题是（　　）",
+                code: "",
+                options: [
+                    "A. 人民军队和解放区的合法地位问题",
+                    "B. 要不要和平建国的问题",
+                    "C.实行宪政、结束训政的问题",
+                    "D.人民的民主、自由权利的问题"
+                ],
+                answer: "A",
+                analysis: "重庆谈判的核心焦点是人民军队和解放区的合法地位问题。"
+            },
+            // 第115题
+            {
+                title: "【单项选择题115】",
+                desc: "全面内战爆发的标志是国民党（　　）",
+                code: "",
+                options: [
+                    "A. 撕毁《双十协定》",
+                    "B. 进攻中原解放区",
+                    "C. 进攻土党地区",
+                    "D. 撕毁停战协定"
+                ],
+                answer: "B",
+                analysis: "1946年6月国民党进攻中原解放区，标志着全面内战爆发。"
+            },
+            // 第116题
+            {
+                title: "【单项选择题116】",
+                desc: "1945年8月至10月，国共双方举行了确认和平建国基本方针的是（　　）",
+                code: "",
+                options: [
+                    "A. 西安谈判",
+                    "B. 重庆谈判",
+                    "C. 南京谈判",
+                    "D. 北平谈判"
+                ],
+                answer: "B",
+                analysis: "1945年重庆谈判达成了《双十协定》，确认了和平建国的基本方针。"
+            },
+            // 第117题
+            {
+                title: "【单项选择题117】",
+                desc: "1946年6月26日，国民党军队挑起全国性内战的起点是大举围攻（　　）",
+                code: "",
+                options: [
+                    "A. 东北解放区",
+                    "B. 中原解放区",
+                    "C. 陕北解放区",
+                    "D. 山东解放区"
+                ],
+                answer: "B",
+                analysis: "1946年6月26日国民党大举进攻中原解放区，标志全面内战爆发。"
+            },
+            // 第118题
+            {
+                title: "【单项选择题118】",
+                desc: "1945年在昆明发生了吹响国统区爱国学生运动第一声号角的是（　　）",
+                code: "",
+                options: [
+                    "A. 一二·九运动",
+                    "B. 一二·一运动",
+                    "C. 一二三〇运动",
+                    "D. 五二〇运动"
+                ],
+                answer: "B",
+                analysis: "1945年昆明一二·一运动是国统区爱国学生运动的开端。"
+            },
+            // 第119题
+            {
+                title: "【单项选择题119】",
+                desc: "1947年10月后，国统区爱国学生运动的主要斗争口号是（　　）",
+                code: "",
+                options: [
+                    "A. 反饥饿",
+                    "B. 反内战",
+                    "C. 反迫害",
+                    "D. 反独裁"
+                ],
+                answer: "C",
+                analysis: "1947年10月后学生运动的主要口号从反饥饿反内战转向反迫害。"
+            },
+            // 第120题
+            {
+                title: "【单项选择题120】",
+                desc: "1948年1月1日在香港正式成立的民主党派是（　　）",
+                code: "",
+                options: [
+                    "A. 中国民主同盟",
+                    "B. 中国民主建国会",
+                    "C. 中国民主促进会",
+                    "D. 中国国民党革命委员会"
+                ],
+                answer: "D",
+                analysis: "1948年1月1日中国国民党革命委员会（民革）在香港正式成立。"
+            },
+            // 第121题
+            {
+                title: "【单项选择题121】",
+                desc: "《中国人民政治协商会议共同纲领》最基本、最核心的内容是关于新中国的（　　）",
+                code: "",
+                options: [
+                    "A. 基本民族政策的规定",
+                    "B. 国体和政体的规定",
+                    "C. 经济政策的规定",
+                    "D. 外交政策的规定"
+                ],
+                answer: "B",
+                analysis: "《共同纲领》规定了新中国的国体为人民民主专政，政体为人民代表大会制度。"
+            },
+            // 第122题
+            {
+                title: "【单项选择题122】",
+                desc: "在1949年9月制定的、正式确立中国共产党在全国执政地位的法律文献是（　　）",
+                code: "",
+                options: [
+                    "A. 《和平建国纲领》",
+                    "B. 《中国人民政治协商会议共同纲领》",
+                    "C. 《中央人民政府组织法》",
+                    "D. 《中华人民共和国宪法》"
+                ],
+                answer: "B",
+                analysis: "1949年9月通过《共同纲领》，具有临时宪法性质，确立了中共在全国的执政地位。"
+            },
+            // 第123题
+            {
+                title: "【多项选择题123】",
+                desc: "抗日战争胜利后，中国国内存在的建国方案主要是（　　）",
+                code: "",
+                options: [
+                    "A. 民族资产阶级的建国方案",
+                    "B. 工人阶级和农民阶级的建国方案",
+                    "C. 地主阶级与买办性的大资产阶级的建国方案",
+                    "D. 工人阶级、农民阶级和城市小资产阶级的建国方案"
+                ],
+                answer: "ACD",
+                analysis: "抗战胜利后主要存在三种建国方案，不包括B项单独的工农建国方案。"
+            },
+            // 第124题
+            {
+                title: "【多项选择题124】",
+                desc: "1947年南京、北平等国统区爱国学生爆发五二〇运动时提出的斗争口号是（　　）",
+                code: "",
+                options: [
+                    "A. 反饥饿",
+                    "B. 反内战",
+                    "C. 反迫害",
+                    "D. 反独裁"
+                ],
+                answer: "ABC",
+                analysis: "五二〇运动的主要口号包括反饥饿、反内战、反迫害、反独裁。"
+            },
+            // 第125题
+            {
+                title: "【多项选择题125】",
+                desc: "对1946年政协会议协议的有关表述，正确的是（　　）",
+                code: "",
+                options: [
+                    "A. 有利于实现民主政治与和平建国",
+                    "B. 在许多方面反映了人们的愿望",
+                    "C. 体现了民主协商的精神",
+                    "D. 很快被国民党政府撕毁"
+                ],
+                answer: "ABD",
+                analysis: "政协协议有利于民主政治与和平建国，反映了人民的愿望，但很快被国民党撕毁。C项有争议。"
+            },
+            // 第126题
+            {
+                title: "【多项选择题126】",
+                desc: "抗战胜利后，蒋介石在积极准备内战的同时又表示愿意与中共进行和平谈判，其目的是（　　）",
+                code: "",
+                options: [
+                    "A. 敷衍国内外舆论，掩盖其正在进行的内战准备",
+                    "B. 诱使中共交出人民军队和解放区政权",
+                    "C. 如果谈判不成，即发动内战，并把战争责任转嫁给中共",
+                    "D. 考虑到经过八年抗战，国内确实需要和平与稳定"
+                ],
+                answer: "ABCD",
+                analysis: "蒋介石的和谈姿态有多重目的，以上四项均符合历史事实。"
+            },
+            // 第127题
+            {
+                title: "【多项选择题127】",
+                desc: "1948年9月12日至1949年1月31日，中国人民解放军发动的三大战略决战是（　　）",
+                code: "",
+                options: [
+                    "A. 辽沈战役",
+                    "B. 淮海战役",
+                    "C. 平津战役",
+                    "D. 渡江战役"
+                ],
+                answer: "ABC",
+                analysis: "三大战略决战是辽沈战役、淮海战役、平津战役。渡江战役不属于三大决战。"
+            },
+            // 第128题
+            {
+                title: "【多项选择题128】",
+                desc: "1949年3月召开的中共七届二中全会的主要内容是（　　）",
+                code: "",
+                options: [
+                    "A. 规定了全国胜利后应当采取的基本政策",
+                    "B. 分析了中国由农业国转变为工业国的任务",
+                    "C. 指明了向社会主义社会转变的发展方向",
+                    "D. 提出了两个务必的要求"
+                ],
+                answer: "ABCD",
+                analysis: "七届二中全会包含以上全部内容，提出了两个务必的重要思想。"
+            },
+            // 第129题
+            {
+                title: "【多项选择题129】",
+                desc: "1949年9月制定的《共同纲领》的主要内容是关于新中国（　　）",
+                code: "",
+                options: [
+                    "A. 基本民族政策的规定",
+                    "B. 国体和政体的规定",
+                    "C. 经济工作方针的规定",
+                    "D. 外交工作原则的规定"
+                ],
+                answer: "ABCD",
+                analysis: "《共同纲领》涵盖民族政策、国体政体、经济方针、外交原则等各方面。"
+            },
+            // 第130题
+            {
+                title: "【多项选择题130】",
+                desc: "中国新民主主义革命胜利的主要原因是（　　）",
+                code: "",
+                options: [
+                    "A. 中国共产党的正确领导",
+                    "B. 广大人民群众的广泛参加和大力支持",
+                    "C. 各民主党派和无党派民主人士等的积极参与",
+                    "D. 国际无产阶级和人民群众的援助"
+                ],
+                answer: "ABCD",
+                analysis: "中国新民主主义革命的胜利是多种因素共同作用的结果，以上四项均正确。"
+            },
+            // 第131题
+            {
+                title: "【多项选择题131】",
+                desc: "中国新民主主义革命胜利的基本经验是坚持（　　）",
+                code: "",
+                options: [
+                    "A. 土地革命",
+                    "B. 武装斗争",
+                    "C. 党的建设",
+                    "D. 统一战线"
+                ],
+                answer: "BCD",
+                analysis: "三大法宝是统一战线、武装斗争、党的建设。土地革命是具体政策。"
+            },
+            // 第132题
+            {
+                title: "【单项选择题132】",
+                desc: "二十世纪五十年代中期，一位民主人士说对于我失去的是个人的剥削所得，得到的却是一个人人富裕的社会主义国家。这指的是关于（　　）的问题。",
+                code: "",
+                options: [
+                    "A. 个体农业社会主义改造",
+                    "B. 资本主义工商业社会主义改造",
+                    "C. 个体手工业社会主义改造",
+                    "D. 合作社经济社会主义改造"
+                ],
+                answer: "B",
+                analysis: "这反映了资本主义工商业者在社会主义改造过程中对个人利益与国家利益关系的认识。"
+            },
+            // 第133题
+            {
+                title: "【单项选择题133】",
+                desc: "对资本主义工商企业进行社会主义改造，对民族资产阶级实行（　　）政策。",
+                code: "",
+                options: [
+                    "A. 争取",
+                    "B. 赎买",
+                    "C. 利用",
+                    "D. 合作"
+                ],
+                answer: "B",
+                analysis: "对民族资产阶级采取了赎买政策，通过和平方式将资本主义工商业转变为社会主义公有制。"
+            },
+            // 第134题
+            {
+                title: "【单项选择题134】",
+                desc: "在对资本主义工商业进行社会主义改造的过程中，当个别企业公私合营后，企业的利润实行（　　）",
+                code: "",
+                options: [
+                    "A. 归国家所有",
+                    "B. 四马分肥",
+                    "C. 归企业所有",
+                    "D. 用于工人的工资"
+                ],
+                answer: "B",
+                analysis: "四马分肥是按国家所得税、企业公积金、工人福利基金和资方红利四方面分配利润。"
+            },
+            // 第135题
+            {
+                title: "【单项选择题135】",
+                desc: "我国二十世纪五十年代改造资本主义工商业的主要形式是（　　）",
+                code: "",
+                options: [
+                    "A. 股份制",
+                    "B. 无偿没收",
+                    "C. 国家资本主义",
+                    "D. 合作化"
+                ],
+                answer: "C",
+                analysis: "对资本主义工商业的改造主要通过国家资本主义的形式进行。"
+            },
+            // 第136题
+            {
+                title: "【单项选择题136】",
+                desc: "下列不属于新中国成立后中共中央提出过渡时期总路线的历史条件是（　　）",
+                code: "",
+                options: [
+                    "A. 完成了民主革命遗留的历史任务",
+                    "B. 巩固了人民民主专政",
+                    "C. 恢复了国民经济",
+                    "D. 完成了发展国民经济的第一个五年计划"
+                ],
+                answer: "D",
+                analysis: "过渡时期总路线是1953年提出的，第一个五年计划尚在实施中，未完成。"
+            },
+            // 第137题
+            {
+                title: "【单项选择题137】",
+                desc: "下列关于新中国成立之初新民主主义政权性质的论述，不正确的有（　　）",
+                code: "",
+                options: [
+                    "A. 人民民主专政的任务是彻底完成新民主主义革命",
+                    "B. 这一政权是工人阶级领导的各革命阶级联合专政",
+                    "C. 在经济上实行的是五种经济成分并存的社会主义经济制度",
+                    "D. 在文化上实行马克思主义指导下的新民主主义文化"
+                ],
+                answer: "C",
+                analysis: "新中国成立初期实行的是新民主主义经济制度，不是社会主义经济制度。"
+            },
+            // 第138题
+            {
+                title: "【单项选择题138】",
+                desc: "我国社会主义改造中的创举是（　　）",
+                code: "",
+                options: [
+                    "A. 农业合作化",
+                    "B. 对民族资产阶级实行赎买政策",
+                    "C. 建立手工业合作社",
+                    "D. 没收官僚资本"
+                ],
+                answer: "B",
+                analysis: "对民族资产阶级实行赎买政策是中国共产党在社会主义改造中的伟大创举。"
+            },
+            // 第139题
+            {
+                title: "【单项选择题139】",
+                desc: "企业的私有制向社会主义所有制转变的和平方法指的是（　　）",
+                code: "",
+                options: [
+                    "A. 实行股份制",
+                    "B. 廉价收购",
+                    "C. 赎买政策",
+                    "D. 没收政策"
+                ],
+                answer: "C",
+                analysis: "和平方法指的是对民族资本家实行赎买政策，实现生产资料所有权的和平过渡。"
+            },
+            // 第140题
+            {
+                title: "【多项选择题140】",
+                desc: "新中国改造资本主义工商业的政策有（　　）",
+                code: "",
+                options: [
+                    "A. 赎买政策",
+                    "B. 加工订货",
+                    "C. 统购包销",
+                    "D. 公私合营"
+                ],
+                answer: "ABCD",
+                analysis: "新中国对资本主义工商业的改造经历了加工订货、统购包销、公私合营等形式，最终通过赎买政策实现和平过渡。"
+            },
+            // 第141题
+            {
+                title: "【多项选择题141】",
+                desc: "第一部《中华人民共和国宪法》中（　　）",
+                code: "",
+                options: [
+                    "A. 规定了国家的性质和根本政治制度",
+                    "B. 规定了民族区域自治制度",
+                    "C. 体现了人民民主原则和社会主义原则",
+                    "D. 规定了人民的权利和义务"
+                ],
+                answer: "ABCD",
+                analysis: "1954年宪法包含以上全部内容。"
+            },
+            // 第142题
+            {
+                title: "【多项选择题142】",
+                desc: "中国共产党在过渡时期的总路线是（　　）",
+                code: "",
+                options: [
+                    "A. 逐步实现国家的社会主义工业化",
+                    "B. 逐步实现对农业的社会主义改造",
+                    "C. 逐步实现对手工业的社会主义改造",
+                    "D. 逐步实现对资本主义工商业的社会主义改造"
+                ],
+                answer: "ABCD",
+                analysis: "过渡时期总路线概括为一化三改。"
+            },
+            // 第143题
+            {
+                title: "【多项选择题143】",
+                desc: "下列关于新民主主义社会主要特征的论述正确的有（　　）",
+                code: "",
+                options: [
+                    "A. 经济上实行在国营经济领导下五种经济成分并存的制度",
+                    "B. 政治上实行工人阶级领导的各革命阶级联合专政",
+                    "C. 民族资产阶级作为一个阶级还存在，并参与国家政权建设",
+                    "D. 新民主主义社会实行马克思主义指导下的新民主主义文化"
+                ],
+                answer: "ACD",
+                analysis: "新民主主义社会的特征包含ACD三项。"
+            },
+            // 第144题
+            {
+                title: "【单项选择题144】",
+                desc: "1956年4至5月间，毛泽东在中央政治局扩大会议和最高国务会议上作的报告是（　　）",
+                code: "",
+                options: [
+                    "A. 《论联合政府》",
+                    "B. 《论人民民主专政》",
+                    "C. 《论十大关系》",
+                    "D. 《关于正确处理人民内部矛盾的问题》"
+                ],
+                answer: "C",
+                analysis: "1956年4月毛泽东发表《论十大关系》，是探索社会主义建设道路的开篇之作。"
+            },
+            // 第145题
+            {
+                title: "【单项选择题145】",
+                desc: "1956年毛泽东提出处理中国共产党与民主党派关系要坚持的方针是（　　）",
+                code: "",
+                options: [
+                    "A. 合作发展共同进步",
+                    "B. 联合执政充分民主",
+                    "C. 肝胆相照荣辱与共",
+                    "D. 长期共存互相监督"
+                ],
+                answer: "D",
+                analysis: "1956年毛泽东提出长期共存互相监督的方针。"
+            },
+            // 第146题
+            {
+                title: "【单项选择题146】",
+                desc: "1956年9月，中共八大确定的社会主义改造完成以后中国社会的主要矛盾是（　　）",
+                code: "",
+                options: [
+                    "A. 无产阶级与资产阶级的矛盾",
+                    "B. 社会主义道路与资本主义道路的矛盾",
+                    "C. 人民对于经济文化迅速发展的需要同当前经济文化不能满足人民需要的状况之间的矛盾",
+                    "D. 生产力与生产关系的矛盾"
+                ],
+                answer: "C",
+                analysis: "中共八大正确分析了社会主义改造完成后中国社会的主要矛盾。"
+            },
+            // 第147题
+            {
+                title: "【单项选择题147】",
+                desc: "1956年9月，中共八大确定的经济建设的方针是（　　）",
+                code: "",
+                options: [
+                    "A. 在综合平衡中稳步前进",
+                    "B. 在加速发展中前进",
+                    "C. 坚决反对左倾冒进",
+                    "D. 跨越式发展"
+                ],
+                answer: "A",
+                analysis: "中共八大提出了在综合平衡中稳步前进的经济建设方针。"
+            },
+            // 第148题
+            {
+                title: "【单项选择题148】",
+                desc: "毛泽东认为，在社会主义建设中，基本的矛盾仍然是（　　）",
+                code: "",
+                options: [
+                    "A. 理论和实践、计划和生产之间的矛盾",
+                    "B. 生产关系和生产力之间的矛盾、上层建筑和经济基础之间的矛盾",
+                    "C. 经济和文化、物质和精神之间的矛盾",
+                    "D. 革命和建设、改革和稳定之间的矛盾"
+                ],
+                answer: "B",
+                analysis: "社会主义社会的基本矛盾仍然是生产关系和生产力、上层建筑和经济基础之间的矛盾。"
+            },
+            // 第149题
+            {
+                title: "【单项选择题149】",
+                desc: "1957年2月，毛泽东在扩大的最高国务会议上发表的讲话是（　　）",
+                code: "",
+                options: [
+                    "A. 《论持久战》",
+                    "B. 《新民主主义论》",
+                    "C. 《论十大关系》",
+                    "D. 《关于正确处理人民内部矛盾的问题》"
+                ],
+                answer: "D",
+                analysis: "1957年2月毛泽东发表《关于正确处理人民内部矛盾的问题》的重要讲话。"
+            },
+            // 第150题
+            {
+                title: "【单项选择题150】",
+                desc: "在1956至1978年这一时期，最大的建设成就是（　　）",
+                code: "",
+                options: [
+                    "A. 初步建立了体系完整的基础设施",
+                    "B. 已经建立了社会主义现代化国家",
+                    "C. 初步建立了国防工业体系",
+                    "D. 基本建立了独立的、比较完整的工业体系和国民经济体系"
+                ],
+                answer: "D",
+                analysis: "这一时期最大的成就是基本建立了独立的比较完整的工业体系和国民经济体系。"
+            },
+            // 第151题
+            {
+                title: "【单项选择题151】",
+                desc: "新中国在尖端科学技术领域取得一系列重要成就，1964年10月取得的成就是（　　）",
+                code: "",
+                options: [
+                    "A. 爆炸了第一颗原子弹",
+                    "B. 爆炸了第一颗氢弹",
+                    "C. 第一枚中远程导弹发射成功",
+                    "D. 第一颗人造地球卫星发射成功"
+
+                ],
+                answer: "A",
+                analysis: "1964年10月16日中国成功爆炸第一颗原子弹。"
+            },
+            // 第152题
+            {
+                title: "【多项选择题152】",
+                desc: "1956年9月，中共八大的重要议程有（　　）",
+                code: "",
+                options: [
+                    "A. 毛泽东致开幕词",
+                    "B. 刘少奇作政治报告",
+                    "C. 周恩来作国民经济发展计划的报告",
+                    "D. 邓小平作关于修改党章的报告"
+                ],
+                answer: "ABCD",
+                analysis: "中共八大的重要议程包括以上四项。"
+            },
+            // 第153题
+            {
+                title: "【多项选择题153】",
+                desc: "在中共八大的发言中，陈云提出的三个主体三个补充的思想是（　　）",
+                code: "",
+                options: [
+                    "A. 国家经营和集体经营是主体，一定数量的个体经营为补充",
+                    "B. 计划生产是主体，一定范围的自由生产为补充",
+                    "C. 国家管理为主体，地方管理为补充",
+                    "D. 国家市场是主体，一定范围的自由市场为补充"
+                ],
+                answer: "ABD",
+                analysis: "三个主体三个补充不包括C项。"
+            },
+            // 第154题
+            {
+                title: "【多项选择题154】",
+                desc: "毛泽东在《关于正确处理人民内部矛盾的问题》中提出解决人民内部矛盾的方法主要有（　　）",
+                code: "",
+                options: [
+                    "A. 民主的方法",
+                    "B. 说服的方法",
+                    "C. 教育的方法",
+                    "D. 团结批评团结的方法"
+                ],
+                answer: "ABCD",
+                analysis: "解决人民内部矛盾主要采用民主、说服、教育和团结批评团结的方法。"
+            },
+            // 第155题
+            {
+                title: "【多项选择题155】",
+                desc: "1957年4月27日，中共中央下发《关于整风运动的指示》，提出整风运动的内容是（　　）",
+                code: "",
+                options: [
+                    "A. 反对官僚主义",
+                    "B. 反对宗派主义",
+                    "C. 反对主观主义",
+                    "D. 反对党八股"
+                ],
+                answer: "ABC",
+                analysis: "1957年整风运动的内容是反对官僚主义、宗派主义和主观主义。"
+            },
+            // 第156题
+            {
+                title: "【单项选择题156】",
+                desc: "1982年9月在中共十二大开幕词中，邓小平明确提出的重大命题是（　　）",
+                code: "",
+                options: [
+                    "A. 坚持四项基本原则",
+                    "B. 发展社会主义市场经济",
+                    "C. 建设有中国特色社会主义",
+                    "D. 没有民主就没有社会主义"
+                ],
+                answer: "C",
+                analysis: "邓小平在十二大开幕词中提出建设有中国特色社会主义的重大命题。"
+            },
+            // 第157题
+            {
+                title: "【单项选择题157】",
+                desc: "1987年10月，中共十三大提出的党在社会主义初级阶段的基本路线被概括为（　　）",
+                code: "",
+                options: [
+                    "A. 一个中心、两个基本点",
+                    "B. “一化三改”",
+                    "C. “一体两翼”",
+                    "D. “三步走”"
+
+                ],
+                answer: "A",
+                analysis: "十三大提出一个中心两个基本点的基本路线。"
+            },
+            // 第158题
+            {
+                title: "【单项选择题158】",
+                desc: "1992年以邓小平南方谈话和中共十四大为标志，中国改革开放和现代化建设事业进入的新发展阶段是（　　）",
+                code: "",
+                options: [
+                    "A. 从计划经济体制向多种经济体制转变",
+                    "B. 从多种经济体制向单一经济体制转变",
+                    "C. 从计划经济体制向社会主义市场经济体制转变",
+                    "D. 从新民主主义经济体制向社会主义市场经济体制转变"
+                ],
+                answer: "C",
+                analysis: "1992年十四大明确提出建立社会主义市场经济体制的目标。"
+            },
+            // 第159题
+            {
+                title: "【单项选择题159】",
+                desc: "中共十五大的主题是（　　）",
+                code: "",
+                options: [
+                    "A. 高举毛泽东思想伟大旗帜",
+                    "B. 高举邓小平理论伟大旗帜",
+                    "C. 坚持三个代表重要思想",
+                    "D. 坚持科学发展观"
+                ],
+                answer: "B",
+                analysis: "十五大主题是高举邓小平理论伟大旗帜，把建设有中国特色社会主义事业全面推向二十一世纪。"
+            },
+            // 第160题
+            {
+                title: "【单项选择题160】",
+                desc: "2004年9月，中共十六届四中全会提出要全面落实的战略思想是（　　）",
+                code: "",
+                options: [
+                    "A. 科技强国战略",
+                    "B. 人才强国战略",
+                    "C. 科学发展观",
+                    "D. 构建社会主义和谐社会"
+                ],
+                answer: "C",
+                analysis: "十六届四中全会提出要全面贯彻落实科学发展观。"
+            },
+            // 第161题
+            {
+                title: "【单项选择题161】",
+                desc: "改革开放以来中国取得一切成绩和进步的根本原因是（　　）",
+                code: "",
+                options: [
+                    "A. 确立社会主义市场经济体制",
+                    "B. 发展社会主义文化事业",
+                    "C. 高度重视科学技术",
+                    "D. 开辟了中国特色社会主义道路，形成了中国特色社会主义理论体系"
+                ],
+                answer: "D",
+                analysis: "根本原因是开辟了中国特色社会主义道路，形成了中国特色社会主义理论体系。"
+            },
+            // 第162题
+            {
+                title: "【多项选择题162】",
+                desc: "为了冲破「两个凡是」的严重束缚，邓小平提出（　　）",
+                code: "",
+                options: [
+                    "A. 要完整地、准确地理解毛泽东思想的科学体系",
+                    "B. 解放思想，实事求是，团结一致向前看",
+                    "C. 实事求是是毛泽东思想的精髓",
+                    "D. 改革开放是决定当代中国命运的关键抉择"
+                ],
+                answer: "ABC",
+                analysis: "为打破两个凡是，邓小平提出了ABC三项主张。"
+            },
+            // 第163题
+            {
+                title: "【多项选择题163】",
+                desc: "1980年，中央决定设立的经济特区是（　　）",
+                code: "",
+                options: [
+                    "A. 深圳",
+                    "B. 珠海",
+                    "C. 汕头",
+                    "D. 厦门"
+                ],
+                answer: "ABCD",
+                analysis: "1980年中央决定设立深圳、珠海、汕头、厦门四个经济特区。"
+            },
+            // 第164题
+            {
+                title: "【多项选择题164】",
+                desc: "1981年6月，中共十一届六中全会决议指出，毛泽东思想的活的灵魂是（　　）",
+                code: "",
+                options: [
+                    "A. 实事求是",
+                    "B. 群众路线",
+                    "C. 独立自主",
+                    "D. 解放思想"
+                ],
+                answer: "ABC",
+                analysis: "毛泽东思想活的灵魂是实事求是、群众路线、独立自主。"
+            },
+            // 第165题
+            {
+                title: "【多项选择题165】",
+                desc: "《关于建国以来党的若干历史问题的决议》对毛泽东同志作出的评价是（　　）",
+                code: "",
+                options: [
+                    "A. 伟大的马克思主义者",
+                    "B. 伟大的无产阶级革命家、战略家和理论家",
+                    "C. 伟大的国际主义战士",
+                    "D. 伟大的民族主义者"
+                ],
+                answer: "AB",
+                analysis: "决议评价毛泽东是伟大的马克思主义者和伟大的无产阶级革命家、战略家和理论家。"
+            },
+            // 第166题
+            {
+                title: "【多项选择题166】",
+                desc: "中共十三大报告指出我国正处在社会主义的初级阶段，这个论断包括的含义是（　　）",
+                code: "",
+                options: [
+                    "A. 我国社会已经是社会主义社会",
+                    "B. 我们必须坚持而不能离开社会主义",
+                    "C. 我国的社会主义社会还处在初级阶段",
+                    "D. 我们必须从这个实际出发，而不能超越这个阶段"
+                ],
+                answer: "ABCD",
+                analysis: "社会主义初级阶段的论断包含以上全部含义。"
+            },
+            // 第167题
+            {
+                title: "【多项选择题167】",
+                desc: "1992年初，邓小平在南方谈话中指出，社会主义的本质是（　　）",
+                code: "",
+                options: [
+                    "A. 解放生产力，发展生产力",
+                    "B. 消灭剥削",
+                    "C. 消除两极分化",
+                    "D. 最终达到共同富裕"
+                ],
+                answer: "ABCD",
+                analysis: "社会主义的本质是解放生产力、发展生产力、消灭剥削、消除两极分化、最终达到共同富裕。"
+            },
+            // 第168题
+            {
+                title: "【多项选择题168】",
+                desc: "邓小平指出改革开放迈不开步子，判断的标准应该主要看（　　）",
+                code: "",
+                options: [
+                    "A. 是否有利于国家安全",
+                    "B. 是否有利于发展社会主义社会的生产力",
+                    "C. 是否有利于增强社会主义国家的综合国力",
+                    "D. 是否有利于提高人民的生活水平"
+                ],
+                answer: "BCD",
+                analysis: "三个有利于标准不包括是否有利于国家安全。"
+            },
+            // 第169题
+            {
+                title: "【多项选择题169】",
+                desc: "中共十七大提出科学发展观的内涵是（　　）",
+                code: "",
+                options: [
+                    "A. 第一要义是发展",
+                    "B. 核心是以人为本",
+                    "C. 基本要求是全面协调可持续",
+                    "D. 根本方法是统筹兼顾"
+                ],
+                answer: "ABCD",
+                analysis: "科学发展观的内涵包括以上四个方面。"
+            },
+            // 第170题
+            {
+                title: "【单项选择题170】",
+                desc: "下列不属于新中国成立初期面临的困难有（　　）",
+                code: "",
+                options: [
+                    "A. 能不能保卫人民胜利的成果",
+                    "B. 能不能战胜严重的经济困难",
+                    "C. 能不能保持艰苦奋斗的作风",
+                    "D. 能不能打破苏联对华的孤立政策"
+                ],
+                answer: "D",
+                analysis: "新中国成立初期中苏关系友好，不存在打破苏联孤立政策的问题。"
+            },
+            // 第171题
+            {
+                title: "【单项选择题171】",
+                desc: "下列关于新中国成立初期中国共产党和人民政府着重抓的工作论述不正确的是（　　）",
+                code: "",
+                options: [
+                    "A. 实现了工业化",
+                    "B. 完成了土地制度的改革",
+                    "C. 肃清了国民党遗留的反动势力",
+                    "D. 废除了封建婚姻制度"
+                ],
+                answer: "A",
+                analysis: "新中国成立初期尚未实现工业化。"
+            },
+            // 第172题
+            {
+                title: "【多项选择题172】",
+                desc: "下列关于中共八大和中共十一届三中全会的论述，正确的有（　　）",
+                code: "",
+                options: [
+                    "A. 都体现了实事求是的精神",
+                    "B. 都明确了经济建设这个中心任务",
+                    "C. 都提出要实行改革开放",
+                    "D. 有内在的继承性"
+                ],
+                answer: "ABD",
+                analysis: "八大和十一届三中全会都体现了实事求是和以经济建设为中心。改革开放是十一届三中全会提出的。"
+            },
+            // 第173题
+            {
+                title: "【单项选择题173】",
+                desc: "二十世纪七十年代中国以（　　）为突破口，带动了中国同西方国家的建交高潮。",
+                code: "",
+                options: [
+                    "A. 恢复在联合国的合法席位",
+                    "B. 中美关系正常化",
+                    "C.中日建交",
+                    "D. 提出“三个世界”划分的理论"
+
+                ],
+                answer: "B",
+                analysis: "20世纪70年代中美关系正常化是中国外交的重大突破。"
+            },
+            // 第174题
+            {
+                title: "【单项选择题174】",
+                desc: "新中国成立初期，领导开展的继续完成新民主主义革命任务的运动有（　　）",
+                code: "",
+                options: [
+                    "A. 土地改革运动",
+                    "B. 三反运动",
+                    "C. 五反运动",
+                    "D. 社会主义改造"
+                ],
+                answer: "A",
+                analysis: "土地改革运动是新中国成立初期为完成新民主主义革命任务而开展的重要运动。"
+            },
+            // 第175题
+            {
+                title: "【多项选择题175】",
+                desc: "新中国成立前后，提出的重要外交方针有（　　）",
+                code: "",
+                options: [
+                    "A. 另起炉灶",
+                    "B. 打扫干净屋子再请客",
+                    "C. 一边倒",
+                    "D. 和平崛起"
+                ],
+                answer: "ABC",
+                analysis: "另起炉灶、打扫干净屋子再请客、一边倒是新中国初期的三大外交方针。"
+            },
+            // 第176题
+            {
+                title: "【多项选择题176】",
+                desc: "新中国成立初期，实行的巩固民族独立的重要措施有（　　）",
+                code: "",
+                options: [
+                    "A. 废除帝国主义国家在中国享有的一切特权",
+                    "B. 收回了外国列强在中国的兵营",
+                    "C. 收回了海关的治权",
+                    "D. 进行了抗美援朝运动"
+                ],
+                answer: "ABCD",
+                analysis: "新中国成立初期通过以上措施彻底摆脱半殖民地地位。"
+            },
+            // 第177题
+            {
+                title: "【多项选择题177】",
+                desc: "新中国成立初期，实行的加强中共自身建设的重要措施有（　　）",
+                code: "",
+                options: [
+                    "A. 对干部和解放军进行城市政策和入城纪律教育",
+                    "B. 在全党范围开展整风整党运动",
+                    "C. 开展三反运动",
+                    "D. 开展五反运动"
+                ],
+                answer: "ABCD",
+                analysis: "新中国成立初期通过以上措施加强党的建设。"
+            },
+            // 第178题
+            {
+                title: "【多项选择题178】",
+                desc: "下列属于中国基本政治制度的有（　　）",
+                code: "",
+                options: [
+                    "A. 按劳分配为主、多种分配方式并存的分配制度",
+                    "B. 中国共产党领导的多党合作和政治协商制度",
+                    "C. 民族区域自治制度",
+                    "D. 人民代表大会制度"
+                ],
+                answer: "BC",
+                analysis: "中国的基本政治制度包括多党合作和政治协商制度、民族区域自治制度、人民代表大会制度。"
+            }
+];
+
+const SONG_LINES = [
+    "花堤蔼蔼，北运滔滔",
+    "巍巍学府北洋高",
+    "悠长称历史，建设为同胞",
+    "不从纸上逞空谈，要实地把中华改造",
+    "穷学理，振科工",
+    "重实验，薄雕虫",
+    "望前驱之英华卓荦，应后起之努力追踪",
+    "念过去之艰难缔造，愿一心一德共扬校誉于无穷"
+];
+
+const QUESTION_CHAPS = [
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "01_反对外国侵略的斗争",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "02_对国家出路的早期探索",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "03_辛亥革命与君主专制制度的终结",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "04_开天辟地的大事变",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "05_中国革命的新道路",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "06_中华民族的抗日战争",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "07_为新中国而奋斗",
+    "08_社会主义基本制度在中国的确立",
+    "08_社会主义基本制度在中国的确立",
+    "08_社会主义基本制度在中国的确立",
+    "08_社会主义基本制度在中国的确立",
+    "08_社会主义基本制度在中国的确立",
+    "08_社会主义基本制度在中国的确立",
+    "08_社会主义基本制度在中国的确立",
+    "08_社会主义基本制度在中国的确立",
+    "08_社会主义基本制度在中国的确立",
+    "08_社会主义基本制度在中国的确立",
+    "08_社会主义基本制度在中国的确立",
+    "08_社会主义基本制度在中国的确立",
+    "09_社会主义建设在探索中曲折发展",
+    "09_社会主义建设在探索中曲折发展",
+    "09_社会主义建设在探索中曲折发展",
+    "09_社会主义建设在探索中曲折发展",
+    "09_社会主义建设在探索中曲折发展",
+    "09_社会主义建设在探索中曲折发展",
+    "09_社会主义建设在探索中曲折发展",
+    "09_社会主义建设在探索中曲折发展",
+    "09_社会主义建设在探索中曲折发展",
+    "09_社会主义建设在探索中曲折发展",
+    "09_社会主义建设在探索中曲折发展",
+    "09_社会主义建设在探索中曲折发展",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期",
+    "10_改革开放与现代化建设新时期"
+];
+
+// ====================== 自动转换生成 DB ======================
+const CAT_MAP = {
+    "01_反对外国侵略的斗争": "📖 01_反对外国侵略的斗争",
+    "02_对国家出路的早期探索": "🔍 02_对国家出路的早期探索",
+    "03_辛亥革命与君主专制制度的终结": "🏴 03_辛亥革命与君主专制制度的终结",
+    "04_开天辟地的大事变": "🔥 04_开天辟地的大事变",
+    "05_中国革命的新道路": "🗺️ 05_中国革命的新道路",
+    "06_中华民族的抗日战争": "⚔️ 06_中华民族的抗日战争",
+    "07_为新中国而奋斗": "🏗️ 07_为新中国而奋斗",
+    "08_社会主义基本制度在中国的确立": "🏛️ 08_社会主义基本制度在中国的确立",
+    "09_社会主义建设在探索中曲折发展": "🔄 09_社会主义建设在探索中曲折发展",
+    "10_改革开放与现代化建设新时期": "🚀 10_改革开放与现代化建设新时期"
+};
+
+const DB = questionData.map((item, index) => {
+    const id = parseInt(item.title.match(/\d+/)[0]);
+    const chap = QUESTION_CHAPS[index] || "01_反对外国侵略的斗争";
+    const cleanOptions = item.options.map(opt => opt.replace(/^[A-D]\.\s*/, '').trim());
+    const isMulti = item.answer.length > 1;
+    const correctIndices = item.answer.split('').map(ch => ch.charCodeAt(0) - 65);
+    return {
+        id: id,
+        chap: chap,
+        diff: 2,
+        q: item.desc,
+        code: item.code.trim() || "",
+        a: cleanOptions,
+        multi: isMulti,
+        ca: correctIndices,
+        c: correctIndices[0],
+        p: item.analysis
+    };
+});
+// ====================== 以下为原有逻辑（几乎不变，仅renderQ支持代码块） ======================
+let user = "";
+let rt = { idx: 0, pool: [], trace: [], answers: {}, selectedMode: "standard", isLocked: false, lastRec: null };
+
+window.onkeydown = (e) => {
+    if (e.key === "Enter" && document.getElementById("page-quiz").classList.contains("active")) {
+        nextQ();
+    }
+};
+
+function doLogin() {
+    user = document.getElementById("user-input").value.trim();
+    if(!user) return;
+    document.getElementById("u-tag").innerText = "用户 " + user;
+    document.getElementById("main-nav").style.display = "flex";
+    goPrepare("normal");
+}
+
+function switchPage(pid) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+    document.getElementById("page-" + pid).classList.add("active");
+    let nid = "nav-" + ((pid === "quiz" || pid === "prepare") ? "prepare" : (pid === "snap" ? "history" : pid));
+    if(document.getElementById(nid)) document.getElementById(nid).classList.add("active");
+    if(pid === "history") renderHist();
+    if(pid === "wrong") renderWrongs();
+    window.scrollTo(0,0);
+}
+
+function selectInitialMode(m) {
+    rt.selectedMode = m;
+    document.querySelectorAll(".mode-card").forEach(c => c.classList.remove("active"));
+    document.querySelector(`.mode-card[onclick*="${m}"]`).classList.add("active");
+    updatePrepView();
+}
+
+function updateCampusLine() {
+    const el = document.getElementById("campus-line-text");
+    if (!el) return;
+    const line = SONG_LINES[Math.floor(Math.random() * SONG_LINES.length)];
+    el.innerText = line;
+}
+
+function goPrepare(m) {
+    if(m === "normal") {
+        document.getElementById("mode-selector").style.display = "grid";
+        selectInitialMode(rt.selectedMode);
+        updateCampusLine();
+    } else {
+        document.getElementById("mode-selector").style.display = "none";
+        rt.selectedMode = m;
+    }
+    updatePrepView();
+    switchPage("prepare");
+}
+
+function updatePrepView() {
+    const names = { "standard":"标准顺序", "random":"完全随机", "hard":"高难模式", "w_order":"错题顺序", "w_rand":"错题随机", "w_freq":"错题强化" };
+    let pool = calculatePool();
+    document.getElementById("prep-mode-name").innerText = names[rt.selectedMode] || "-";
+    document.getElementById("prep-count").innerText = pool.length;
+    document.getElementById("hard-config").style.display = rt.selectedMode === "hard" ? "block" : "none";
+}
+
+function calculatePool() {
+    let p = [...DB];
+    if(rt.selectedMode.startsWith("w_")) {
+        let wData = JSON.parse(localStorage.getItem("W_DATA_" + user) || "{}");
+        let wIds = Object.keys(wData).map(Number);
+        p = DB.filter(q => wIds.includes(q.id));
+    }
+    if(rt.selectedMode === "hard") {
+        let n = parseInt(document.getElementById("hard-num")?.value) || 5;
+        p.sort((a,b) => b.diff - a.diff);
+        p = p.slice(0, n);
+    }
+    return p;
+}
+
+function realStart() {
+    rt.pool = calculatePool();
+    if(rt.pool.length === 0) return alert("暂无可练题目。");
+    if(rt.selectedMode === "random" || rt.selectedMode === "w_rand") {
+        rt.pool = rt.pool.sort(() => Math.random() - 0.5);
+    }
+    rt.idx = 0;
+    rt.trace = [];
+    rt.answers = {};
+    document.getElementById("progress-panel").style.display = "none";
+    renderQ();
+    switchPage("quiz");
+}
+
+function getFullTrace() {
+    return rt.pool.map(q => rt.answers[q.id] || { qid: q.id, u: (q.multi ? [] : -1), ok: false, skipped: true });
+}
+
+function getUnansweredCount() {
+    return rt.pool.filter(q => !rt.answers[q.id]).length;
+}
+
+function toggleProgressPanel() {
+    const panel = document.getElementById("progress-panel");
+    panel.style.display = panel.style.display === "block" ? "none" : "block";
+    renderProgressPanel();
+}
+
+function renderProgressPanel() {
+    const panel = document.getElementById("progress-panel");
+    const unanswered = getUnansweredCount();
+    panel.innerHTML = `
+        <div class="progress-head">
+            <span>作答情况</span>
+            <span>已答 ${rt.pool.length - unanswered} / ${rt.pool.length}，未答 ${unanswered}</span>
+        </div>
+        <div class="progress-grid">
+            ${rt.pool.map((q, index) => {
+                const a = rt.answers[q.id];
+                let cls = "todo";
+                if(index === rt.idx) cls = "current";
+                else if(a && a.ok) cls = "done";
+                else if(a && !a.ok) cls = "wrong";
+                return `<button class="progress-item ${cls}" onclick="jumpToQuestion(${index})">${index + 1}</button>`;
+            }).join("")}
+        </div>
+        <div style="margin-top:10px; color:var(--t2); font-size:13px;">点击题号可直接跳转，浅色按钮表示尚未作答。</div>
+    `;
+}
+
+window.jumpToQuestion = (index) => {
+    rt.idx = index;
+    renderQ();
+};
+
+function answerCurrent(i) {
+    const q = rt.pool[rt.idx];
+    if (rt.answers[q.id]) return;
+
+    if (q.multi) {
+        if (!rt._multiSel) rt._multiSel = [];
+        const idx = rt._multiSel.indexOf(i);
+        if (idx >= 0) rt._multiSel.splice(idx, 1);
+        else rt._multiSel.push(i);
+        renderQ();
+        return;
+    }
+
+    const ok = (i === q.c);
+    const traceItem = { ok, qid: q.id, u: i, skipped: false };
+    rt.answers[q.id] = traceItem;
+
+    if (!ok) saveWrong(traceItem);
+    renderQ();
+}
+
+function confirmMultiAnswer() {
+    const q = rt.pool[rt.idx];
+    if (!q.multi || rt.answers[q.id]) return;
+    const sel = (rt._multiSel || []).slice().sort();
+    const correct = q.ca.slice().sort();
+    const ok = sel.length === correct.length && sel.every((v, i) => v === correct[i]);
+    const traceItem = { ok, qid: q.id, u: sel, skipped: sel.length === 0 };
+    rt.answers[q.id] = traceItem;
+    if (!ok) saveWrong(traceItem);
+    rt._multiSel = [];
+    renderQ();
+}
+
+function renderQ() {
+    document.getElementById("ana-area").style.display = "none";
+    document.getElementById("multi-confirm-area").style.display = "none";
+
+    const q = rt.pool[rt.idx];
+    const existing = rt.answers[q.id];
+    rt.isLocked = !!existing;
+
+    document.getElementById("tag-container").innerHTML = `<span class="tag-chapter">${CAT_MAP[q.chap] || q.chap}</span>`;
+    document.getElementById("q-meta-idx").innerText = `${rt.idx + 1} / ${rt.pool.length}`;
+    if (q.multi) {
+        document.getElementById("q-meta-idx").innerText += ' [多选题]';
+    }
+
+    let qHTML = q.q;
+    if (q.code) {
+        qHTML += `<div class="code-box">${q.code}</div>`;
+    }
+    document.getElementById("q-text").innerHTML = qHTML;
+
+    const box = document.getElementById("opt-box");
+    box.innerHTML = "";
+    q.a.forEach((t, i) => {
+        const d = document.createElement("div");
+        d.className = "opt";
+        const isSelected = rt._multiSel && rt._multiSel.includes(i);
+        if (isSelected && !existing) d.style.background = "#eef4ff";
+        d.innerHTML = `<span class="opt-idx">${String.fromCharCode(65+i)}</span> ${t}`;
+        d.onclick = () => answerCurrent(i);
+        box.appendChild(d);
+    });
+
+    if (q.multi && !existing && rt._multiSel && rt._multiSel.length > 0) {
+        document.getElementById("multi-confirm-area").style.display = "block";
+    }
+
+    if (existing) {
+        const opts = document.querySelectorAll(".opt");
+        if (q.multi) {
+            q.ca.forEach(ci => { if(opts[ci]) opts[ci].classList.add("correct"); });
+            if (!existing.ok && existing.u && Array.isArray(existing.u)) {
+                existing.u.forEach(ui => { if(opts[ui]) opts[ui].classList.add("wrong"); });
+            }
+            const correctStr = q.ca.map(ci => String.fromCharCode(65+ci)).join('');
+            document.getElementById("ana-cont").innerHTML = existing.ok
+                ? `<b>回答正确</b><br>${q.p}`
+                : `<b>正确答案：${correctStr}</b><br>${q.p}`;
+        } else {
+            opts[q.c].classList.add("correct");
+            if (!existing.ok && typeof existing.u === 'number' && existing.u !== -1) {
+                opts[existing.u].classList.add("wrong");
+            }
+            document.getElementById("ana-cont").innerHTML = existing.ok
+                ? `<b>回答正确</b><br>${q.p}`
+                : `<b>正确答案：${String.fromCharCode(65+q.c)}</b><br>${q.p}`;
+        }
+        document.getElementById("ana-area").style.display = "block";
+    }
+
+    renderProgressPanel();
+}
+
+function nextQ() {
+    if (rt.idx < rt.pool.length - 1) {
+        rt.idx++;
+        renderQ();
+    } else {
+        submitPaper();
+    }
+}
+
+function submitPaper() {
+    const unanswered = getUnansweredCount();
+    const msg = unanswered > 0
+        ? `当前还有 ${unanswered} 题未作答，确认提前交卷吗？`
+        : "已完成全部题目，确认提交试卷吗？";
+
+    if (confirm(msg)) finish();
+}
+
+function finish() {
+    const fullTrace = getFullTrace();
+    const score = Math.round((fullTrace.filter(t => t.ok).length / rt.pool.length) * 100);
+    document.getElementById("res-score").innerText = score;
+    rt.lastRec = { time: new Date().toLocaleString(), score, trace: fullTrace, isWrongMode: rt.selectedMode.startsWith("w_") };
+    if(!rt.lastRec.isWrongMode) {
+        let h = JSON.parse(localStorage.getItem("H_" + user) || "[]");
+        h.unshift(rt.lastRec);
+        localStorage.setItem("H_" + user, JSON.stringify(h.slice(0,10)));
+    }
+    switchPage("result");
+}
+
+function showSnap(rec = null, showFooter = false, fromPage = "history") {
+    const data = rec || rt.lastRec;
+    const list = document.getElementById("snap-list");
+    list.innerHTML = `<h3 style="text-align:center; color:var(--tju-blue)">题目详情回顾</h3>`;
+    data.trace.forEach((t) => {
+        const q = DB.find(item => item.id === t.qid);
+        const div = document.createElement("div");
+        div.className = "snap-item";
+        const statusText = t.skipped ? "未作答" : (t.ok ? "答对" : "答错");
+        const statusColor = t.skipped ? "var(--t2)" : (t.ok ? "var(--ok)" : "var(--err)");
+        div.innerHTML = `
+            <div style="color:${statusColor}; font-weight:bold;">题目编号 #${q.id} - [${CAT_MAP[q.chap] || q.chap}] | ${statusText}</div>
+            <div class="q-text" style="font-size:18px; margin:10px 0;">${q.q}</div>
+            ${q.code ? `<div class="code-box">${q.code}</div>` : ""}
+            <div class="opt-grid">
+                ${q.a.map((opt, oi) => {
+    let cls = '';
+    if (q.multi) {
+        if (q.ca.includes(oi)) cls += ' correct';
+        if (t.u && Array.isArray(t.u) && t.u.includes(oi) && !t.ok && !t.skipped) cls += ' wrong';
+    } else {
+        if (oi === q.c) cls += ' correct';
+        if (oi === t.u && !t.ok && !t.skipped) cls += ' wrong';
+    }
+    return `<div class="opt ${cls}" style="padding:10px; font-size:14px;"><span class="opt-idx" style="width:20px; height:20px;">${String.fromCharCode(65+oi)}</span> ${opt}</div>`;
+}).join("")}
+            </div>
+            <div class="ana-box">${t.skipped ? "<b>本题未作答</b><br>" : ""}解析：${q.p}</div>
+        `;
+        list.appendChild(div);
+    });
+    document.getElementById("snap-back-btn").innerText = fromPage === "wrong" ? "返回错题列表" : "返回历史记录";
+    document.getElementById("snap-back-btn").onclick = () => switchPage(fromPage);
+    switchPage("snap");
+}
+
+function toggleScoreChart() {
+    const panel = document.getElementById("score-chart");
+    if (!panel) return;
+    panel.style.display = panel.style.display === "block" ? "none" : "block";
+    if (panel.style.display === "block") renderScoreChart();
+}
+
+function renderScoreChart() {
+    const panel = document.getElementById("score-chart");
+    const h = JSON.parse(localStorage.getItem("H_" + user) || "[]");
+    if (!panel) return;
+    if (h.length <= 2) {
+        panel.style.display = "none";
+        return;
+    }
+
+    const points = [...h].reverse();
+    const width = 760;
+    const height = 260;
+    const left = 45;
+    const right = 20;
+    const top = 20;
+    const bottom = 40;
+    const innerW = width - left - right;
+    const innerH = height - top - bottom;
+    const step = points.length > 1 ? innerW / (points.length - 1) : innerW;
+    const polyline = points.map((item, index) => {
+        const x = left + step * index;
+        const y = top + innerH - (item.score / 100) * innerH;
+        return `${x},${y}`;
+    }).join(" ");
+    const dots = points.map((item, index) => {
+        const x = left + step * index;
+        const y = top + innerH - (item.score / 100) * innerH;
+        return `<circle class="chart-dot" cx="${x}" cy="${y}" r="4"></circle><text class="chart-label" x="${x}" y="${y - 10}" text-anchor="middle">${item.score}</text><text class="chart-label" x="${x}" y="${height - 12}" text-anchor="middle">${index + 1}</text>`;
+    }).join("");
+    const yLabels = [0, 20, 40, 60, 80, 100].map(score => {
+        const y = top + innerH - (score / 100) * innerH;
+        return `<text class="chart-label" x="8" y="${y + 4}">${score}</text><line class="chart-axis" x1="${left}" y1="${y}" x2="${width - right}" y2="${y}"></line>`;
+    }).join("");
+
+    panel.innerHTML = `
+        <h3>成绩曲线</h3>
+        <svg viewBox="0 0 ${width} ${height}" preserveAspectRatio="none">
+            ${yLabels}
+            <line class="chart-axis" x1="${left}" y1="${height - bottom}" x2="${width - right}" y2="${height - bottom}"></line>
+            <polyline class="chart-line" points="${polyline}"></polyline>
+            ${dots}
+        </svg>
+        <div style="margin-top:8px; color:var(--t2); font-size:13px;">横轴为测试次数，纵轴为分数。</div>
+    `;
+}
+
+function renderHist() {
+    const h = JSON.parse(localStorage.getItem('H_'+user) || '[]');
+    const chartBtn = document.getElementById('score-chart-btn');
+    const chart = document.getElementById('score-chart');
+    if (chartBtn) chartBtn.style.display = h.length > 2 ? 'inline-block' : 'none';
+    if (chart && h.length <= 2) chart.style.display = 'none';
+    document.getElementById('hist-list').innerHTML = h.map((item, i) => `
+        <div class="item-card" onclick="viewHist(${i})"><b>${item.time}</b> <span style="float:right; color:var(--tju-blue); font-weight:bold;">${item.score}分</span></div>
+    `).join('') || '<div style="text-align:center; color:var(--t2)">暂无历史记录</div>';
+    if (chart && chart.style.display === 'block' && h.length > 2) renderScoreChart();
+}
+
+window.viewHist = (i) => {
+    const h = JSON.parse(localStorage.getItem('H_'+user) || '[]');
+    showSnap(h[i], true, 'history');
+};
+
+function renderWrongs() {
+    const wData = JSON.parse(localStorage.getItem('W_DATA_'+user) || '{}');
+    const ids = Object.keys(wData).map(Number).sort((a,b)=>a-b);
+    
+    const groups = {};
+    ids.forEach(id => {
+        const q = DB.find(item => item.id === id);
+        if (!q) return;
+        const groupName = CAT_MAP[q.chap] || "💠 其他";
+        if(!groups[groupName]) groups[groupName] = [];
+        groups[groupName].push(q);
+    });
+
+    const container = document.getElementById('w-content');
+    container.innerHTML = '';
+
+    if(ids.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:50px; color:var(--t2)">恭喜，目前没有错题记录！</div>';
+        return;
+    }
+
+    for(const [name, items] of Object.entries(groups)) {
+        const section = document.createElement('div');
+        section.innerHTML = `<div class="category-header"><span>${name}</span> <span style="font-size:12px; opacity:0.7">${items.length} 题</span></div>`;
+        items.forEach(q => {
+            const card = document.createElement('div');
+            card.className = 'item-card';
+            card.onclick = () => viewWrongSnap(q.id);
+            card.innerHTML = `
+                <span class="del-btn" onclick="removeWrong(${q.id}, event)">移除</span>
+                <b>#${q.id}</b> ${q.q}
+            `;
+            section.appendChild(card);
+        });
+        container.appendChild(section);
+    }
+}
+
+window.viewWrongSnap = (id) => {
+    const wData = JSON.parse(localStorage.getItem('W_DATA_'+user) || '{}');
+    showSnap({ trace: [wData[id]], isWrongMode: true }, true, 'wrong');
+};
+
+function removeWrong(id, e) {
+    e.stopPropagation();
+    let wData = JSON.parse(localStorage.getItem('W_DATA_'+user) || '{}');
+    delete wData[id];
+    localStorage.setItem('W_DATA_'+user, JSON.stringify(wData));
+    renderWrongs();
+}
+
+function saveWrong(traceItem) {
+    let wData = JSON.parse(localStorage.getItem('W_DATA_'+user) || '{}');
+    wData[traceItem.qid] = traceItem;
+    localStorage.setItem('W_DATA_'+user, JSON.stringify(wData));
+}
+
+</script>
+</body>
+</html>
