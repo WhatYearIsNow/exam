@@ -23,3 +23,10 @@ __pycache__/
 
 # Node (if someone adds build tools later)
 node_modules/
+dist/
+.next/
+.vinext/
+.wrangler/
+.env*
+outputs/
+.npm-cache/
