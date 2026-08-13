@@ -1,109 +1,112 @@
-# TJU-Quiz-Hub
+# TJU Quiz Hub
 
-天津大学（北洋大学）多科目客观题刷题系统 —— 一个纯前端、零依赖、开箱即用的刷题框架。
+[![CI](https://github.com/WhatYearIsNow/TJU-Quiz-Hub/actions/workflows/ci.yml/badge.svg)](https://github.com/WhatYearIsNow/TJU-Quiz-Hub/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-> 天大学子，一键迁移到任意科目。
+天津大学多科目客观题刷题站，支持章节练习、综合训练、模拟考试、错题回顾和成绩追踪。
 
-## 特色
+项目包含两个互补入口：
 
-- **零依赖** — 纯 HTML/CSS/JS，无需 Node.js、无需构建工具，双击即用
-- **单文件框架** — 核心框架 `index.html` 不到 50KB
-- **题库外置** — 题库为独立 `.js` 文件，替换即可切换科目
-- **三种刷题模式**
-  - 章节检测 — 逐章突破
-  - 综合训练 — 全部题目随机打乱
-  - 模拟考试 — 按章节比例抽题组卷（单选+多选）
-- **智能错题本** — 错题自动收录，支持重练和一键清空
-- **成绩追踪** — 历史记录 + SVG 成绩曲线
-- **断点续答** — 退出自动保存，回来继续作答
-- **响应式设计** — 手机/平板/电脑均可使用
-- **支持单选+多选** — 自动检测题库类型，适配 UI
-- **服务器模式（参考）** — 提供 Flask 后端方案，可共享答题数据，详见文档
+- 托管站点：Vinext、React 和 Cloudflare Worker 构建的课程选择首页。
+- 独立刷题页：纯 HTML/CSS/JavaScript，直接打开根目录 `index.html` 即可使用。
 
-## 快速开始
+默认情况下，答题记录仅保存在当前浏览器的 `localStorage` 中。项目与天津大学官方无隶属关系。
 
-1. 下载或克隆本仓库
-2. 双击打开 `index.html`
-3. 输入姓名，开始刷题
+## 功能
 
-### 切换科目
+- 章节检测、综合训练和模拟考试
+- 单选题与多选题
+- 错题自动收录和集中重练
+- 历史成绩与进度保存
+- 手机、平板和桌面端响应式布局
+- 无需注册，独立版无需安装依赖
+- 可选的 Flask 局域网统计示例
 
-支持通过 URL 参数切换题库：
+## 快速使用
 
+### 直接刷题
+
+1. 下载或克隆仓库。
+2. 双击根目录的 `index.html`。
+3. 输入姓名并选择练习模式。
+
+也可以通过查询参数直接切换题库：
+
+```text
+index.html?bank=history-264
+index.html?bank=history-178
+index.html?bank=cs-python-100
 ```
-index.html?bank=history-264    # 中国近现代史纲要（264题，默认）
-index.html?bank=history-178    # 中国近现代史纲要（178题）
-index.html?bank=cs-python-100  # 计算机软件技术基础（Python）
+
+### 本地开发
+
+需要 Node.js 22.13 或更高版本。
+
+```bash
+npm ci
+npm run dev
 ```
+
+常用命令：
+
+| 命令 | 用途 |
+| --- | --- |
+| `npm run dev` | 启动本地开发服务器 |
+| `npm run build` | 生成生产构建 |
+| `npm run lint` | 检查代码规范 |
+| `npm run typecheck` | 检查 TypeScript 类型 |
+| `npm test` | 运行题库与静态资源测试 |
+| `npm run check` | 运行提交前的完整检查 |
 
 ## 可用题库
 
-| 文件 | 科目 | 题数 | 题型 |
-|------|------|------|------|
-| `banks/history-264.js` | 中国近现代史纲要 | 264 | 单选 + 多选 |
-| `banks/history-178.js` | 中国近现代史纲要 | 178 | 单选 + 多选 |
-| `banks/cs-python-100.js` | 计算机软件技术基础 | 100 | 单选 |
+| 题库文件 | 科目 | 题数 | 题型 |
+| --- | --- | ---: | --- |
+| `banks/history-264.js` | 中国近现代史纲要 | 264 | 单选、多选 |
+| `banks/history-178.js` | 中国近现代史纲要 | 178 | 单选、多选 |
+| `banks/cs-python-100.js` | 计算机软件技术基础（Python） | 100 | 单选 |
 
-## 自定义题库
-
-只需创建 `banks/your-subject.js`，定义题目数据即可。详见：
-
-- [题库数据格式说明](docs/data-format.md)
-- [自定义题库指南](docs/custom-quiz-guide.md)
-
-核心步骤：
-1. 复制 `banks/history-264.js` 为你的题库文件
-2. 修改 `QUIZ_META`（科目名、版本号）
-3. 替换 `questionData`（题目数组）
-4. 更新 `QUESTION_CHAPS`（章节分配）
-5. 通过 `?bank=your-subject` 使用
+创建新题库时，请参考[题库数据格式](docs/data-format.md)和[自定义题库指南](docs/custom-quiz-guide.md)。提交前可运行 `npm test` 检查题目结构和答案。
 
 ## 项目结构
 
-```
+```text
 TJU-Quiz-Hub/
-├── index.html                   # 核心刷题框架
-├── banks/                       # 题库目录
-│   ├── history-264.js           # 中国近现代史纲要（264题）
-│   ├── history-178.js           # 中国近现代史纲要（178题）
-│   └── cs-python-100.js         # 计算机软件技术基础（Python）
-├── docs/
-│   ├── data-format.md           # 题库数据格式说明
-│   └── custom-quiz-guide.md     # 自定义题库指南
-├── archive/                     # 原始完整版 HTML（含内嵌题库，可独立使用）
-│   ├── 25262版中国近现代史纲要选择题刷题系统.html
-│   ├── 史纲选择题(178题).html
-│   └── I love TJU.html
-├── .gitignore
-└── LICENSE
+├── .github/                 # CI、Issue 与 PR 模板
+├── .openai/                 # Sites 托管配置
+├── app/                     # Vinext/React 托管首页
+├── archive/                 # 历史原始资料
+├── banks/                   # 题库唯一来源
+├── docs/                    # 数据格式和部署文档
+├── examples/flask-server/   # 可选的局域网统计示例
+├── public/                  # 托管静态资源
+├── tests/                   # Node.js 测试
+├── tooling/                 # 构建与资源同步工具
+├── worker/                  # Cloudflare Worker 入口
+├── index.html               # 独立刷题页的唯一来源
+├── package.json
+└── vite.config.ts
 ```
 
-## 浏览器兼容性
+`public/quiz.html`、`public/banks/` 和 `public/LICENSE.txt` 由根目录对应文件同步生成，请勿直接编辑。`npm run dev` 和 `npm run build` 会自动同步；`npm run sync:check` 可检查是否一致。
 
-支持所有现代浏览器（Chrome、Firefox、Safari、Edge）。使用 `localStorage` 存储数据，清除浏览器数据会导致记录丢失。
+## 部署
 
-## 参考：服务器模式（作者未实测）
-
-> ⚠️ 以下为社区参考方案，作者未在生产环境测试过，仅供参考。
-
-项目中提供了 `server.py` + `stats.html`，可将系统部署到服务器上，全班学生的答题数据自动汇总，通过 `/stats` 页面查看高频错题排行、成绩分布等。
+生产构建输出到 `dist/`：
 
 ```bash
-pip install flask
-python server.py
+npm ci
+npm run build
 ```
 
-详见 [docs/deploy.md](docs/deploy.md)。欢迎社区反馈和改进。
+当前托管站点使用 `.openai/hosting.json` 与 Cloudflare Worker 兼容构建。其他部署方式及可选 Flask 示例见[部署说明](docs/deploy.md)。
 
-## License
+## 贡献
 
-MIT — 自由使用、修改、分发。欢迎贡献新题库！
+欢迎修正题目、补充题库或改进功能。提交前请阅读 [CONTRIBUTING.md](CONTRIBUTING.md)，并确保 `npm run check` 通过。
 
-## 贡献指南
+报告漏洞或隐私问题时，请遵循 [SECURITY.md](SECURITY.md)，不要在公开 Issue 中披露敏感信息。
 
-欢迎提交 Pull Request 添加新科目题库，或将本框架迁移到其他高校的课程。
+## 许可与题库内容
 
-提交题库时，请确保：
-- 题库文件放在 `banks/` 目录
-- 包含完整的 `QUIZ_META`、`questionData`、`QUESTION_CHAPS`、`CAT_MAP`、`SONG_LINES`
-- 题目内容准确，答案正确
+项目代码采用 [MIT License](LICENSE)。题库内容可能整理自课程资料，其著作权归原权利人所有，仅供学习交流；如需更正来源、授权信息或申请移除，请通过仓库维护者联系方式反馈。

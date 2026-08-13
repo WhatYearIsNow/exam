@@ -10,9 +10,17 @@ const eslintConfig = defineConfig([
     // Default ignores of eslint-config-next:
     ".next/**",
     "out/**",
+    "dist/**",
     "build/**",
+    "public/**",
     "next-env.d.ts",
   ]),
+  {
+    files: ["banks/**/*.js"],
+    rules: {
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;

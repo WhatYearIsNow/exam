@@ -1,18 +1,22 @@
 """
-TJU-Quiz-Hub 服务器（参考方案，作者未实测）
-一键启动：pip install flask && python server.py
-学生访问 http://服务器IP:5000 即可刷题，数据自动汇总。
-注意：此方案未经充分测试，生产环境使用前请自行评估。
+TJU-Quiz-Hub Flask 参考服务器。
+
+启动：python examples/flask-server/server.py
+默认仅监听 127.0.0.1；仅在可信局域网中按文档显式开放监听。
 """
-import sqlite3
 import os
+import sqlite3
 from datetime import datetime
-from flask import Flask, request, jsonify, send_from_directory, g
+from pathlib import Path
 
-app = Flask(__name__, static_folder=".", static_url_path="")
+from flask import Flask, g, jsonify, request, send_from_directory
 
-# ---------- 数据库 ----------
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "quiz_data.db")
+EXAMPLE_DIR = Path(__file__).resolve().parent
+PROJECT_ROOT = EXAMPLE_DIR.parent.parent
+BANKS_DIR = PROJECT_ROOT / "banks"
+DB_PATH = EXAMPLE_DIR / "quiz_data.db"
+
+app = Flask(__name__, static_folder=None)
 
 
 def get_db():
@@ -58,23 +62,21 @@ def init_db():
     db.close()
 
 
-# ---------- 静态文件 ----------
 @app.route("/")
 def index():
-    return send_from_directory(".", "index.html")
+    return send_from_directory(PROJECT_ROOT, "index.html")
 
 
 @app.route("/banks/<path:filename>")
 def serve_bank(filename):
-    return send_from_directory("banks", filename)
+    return send_from_directory(BANKS_DIR, filename)
 
 
 @app.route("/stats")
 def stats_page():
-    return send_from_directory(".", "stats.html")
+    return send_from_directory(EXAMPLE_DIR, "stats.html")
 
 
-# ---------- API ----------
 @app.route("/api/submit", methods=["POST"])
 def api_submit():
     """提交答题结果"""
@@ -87,10 +89,16 @@ def api_submit():
     )
     submission_id = cur.lastrowid
 
-    for w in data.get("wrongs", []):
+    for wrong in data.get("wrongs", []):
         db.execute(
             "INSERT INTO wrong_answers (submission_id, question_id, question_text, chapter, correct_answer) VALUES (?, ?, ?, ?, ?)",
-            (submission_id, w["qid"], w["qtext"], w.get("chapter", ""), w.get("answer", "")),
+            (
+                submission_id,
+                wrong["qid"],
+                wrong["qtext"],
+                wrong.get("chapter", ""),
+                wrong.get("answer", ""),
+            ),
         )
 
     db.commit()
@@ -106,7 +114,6 @@ def api_stats():
     subject_filter = "WHERE subject = ?" if subject else ""
     params = (subject,) if subject else ()
 
-    # 总览
     overview = db.execute(
         f"SELECT COUNT(*) as total_attempts, ROUND(AVG(score), 1) as avg_score, "
         f"MAX(score) as best_score, COUNT(DISTINCT username) as users "
@@ -114,7 +121,6 @@ def api_stats():
         params,
     ).fetchone()
 
-    # 按章节统计
     chapter_stats = db.execute(
         f"SELECT w.chapter, COUNT(*) as wrong_count, COUNT(DISTINCT w.question_id) as unique_wrongs "
         f"FROM wrong_answers w JOIN submissions s ON w.submission_id = s.id "
@@ -123,7 +129,6 @@ def api_stats():
         params,
     ).fetchall()
 
-    # 高频错题 Top 20
     top_wrongs = db.execute(
         f"SELECT w.question_id, w.question_text, w.chapter, w.correct_answer, COUNT(*) as cnt "
         f"FROM wrong_answers w JOIN submissions s ON w.submission_id = s.id "
@@ -132,7 +137,6 @@ def api_stats():
         params,
     ).fetchall()
 
-    # 最近提交
     recent = db.execute(
         f"SELECT username, subject, score, total, mode, created_at "
         f"FROM submissions {subject_filter} "
@@ -140,8 +144,7 @@ def api_stats():
         params,
     ).fetchall()
 
-    # 成绩分布
-    dist = db.execute(
+    distribution = db.execute(
         f"SELECT "
         f"SUM(CASE WHEN score >= 90 THEN 1 ELSE 0 END) as a, "
         f"SUM(CASE WHEN score >= 80 AND score < 90 THEN 1 ELSE 0 END) as b, "
@@ -154,10 +157,10 @@ def api_stats():
 
     return jsonify({
         "overview": dict(overview) if overview else {},
-        "chapter_stats": [dict(r) for r in chapter_stats],
-        "top_wrongs": [dict(r) for r in top_wrongs],
-        "recent": [dict(r) for r in recent],
-        "distribution": dict(dist) if dist else {},
+        "chapter_stats": [dict(row) for row in chapter_stats],
+        "top_wrongs": [dict(row) for row in top_wrongs],
+        "recent": [dict(row) for row in recent],
+        "distribution": dict(distribution) if distribution else {},
     })
 
 
@@ -167,11 +170,24 @@ def api_ping():
     return jsonify({"ok": True, "time": datetime.now().isoformat()})
 
 
-# ---------- 启动 ----------
 if __name__ == "__main__":
     init_db()
-    print("\n  TJU-Quiz-Hub 服务器已启动")
-    print("  本地访问: http://127.0.0.1:5000")
-    print("  统计看板: http://127.0.0.1:5000/stats")
+    host = os.environ.get("TJU_QUIZ_HOST", "127.0.0.1")
+    port = int(os.environ.get("TJU_QUIZ_PORT", "5000"))
+    debug = os.environ.get("TJU_QUIZ_DEBUG", "").strip().lower() in {
+        "1",
+        "true",
+        "yes",
+        "on",
+    }
+
+    print("\n  TJU-Quiz-Hub Flask 参考服务器已启动")
+    print(f"  本机访问: http://127.0.0.1:{port}")
+    print(f"  统计看板: http://127.0.0.1:{port}/stats")
+    if host == "0.0.0.0":
+        print(f"  局域网访问: http://<本机局域网 IP>:{port}")
+    if debug:
+        print("  注意：调试模式已显式开启，仅限本机开发使用")
     print("  按 Ctrl+C 停止\n")
-    app.run(host="0.0.0.0", port=5000, debug=True)
+
+    app.run(host=host, port=port, debug=debug)

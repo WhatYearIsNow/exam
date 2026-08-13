@@ -19,14 +19,22 @@ Desktop.ini
 __pycache__/
 *.pyc
 *.pyo
-*.db
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+quiz_data.db*
 
-# Node (if someone adds build tools later)
+# Node
 node_modules/
 dist/
 .next/
 .vinext/
 .wrangler/
+coverage/
+*.log
+*.tsbuildinfo
 .env*
+!.env.example
 outputs/
 .npm-cache/

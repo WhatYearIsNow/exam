@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>题库练习</title>
+    <title>TJU Quiz Hub｜题库练习</title>
     <style>
         :root { 
             --tju-blue: #004098; --tju-light: #eff6ff; --bg: #f4f7f9; 
@@ -260,14 +260,71 @@
         .chapter-card .ch-count { font-size: 13px; color: var(--t2); background: #f1f5f9; padding: 4px 10px; border-radius: 12px; white-space: nowrap; }
         @media (max-width: 768px) { .chapter-grid { grid-template-columns: 1fr; } }
 
+        body {
+            background:
+                radial-gradient(circle at 20% 10%, rgba(7,84,198,.08), transparent 34%),
+                #f4f0e7;
+            color: #101828;
+            font-family: Inter, "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+        .app {
+            width: min(1180px, calc(100% - 36px));
+            margin: 22px auto;
+            background: rgba(255,253,248,.94);
+            border: 1px solid rgba(7,26,53,.16);
+            border-radius: 4px;
+            box-shadow: 18px 20px 0 rgba(7,26,53,.09);
+            overflow: hidden;
+        }
+        header {
+            min-height: 78px;
+            padding: 18px 28px;
+            background: #071a35;
+            border-radius: 0;
+        }
+        .logo { display:flex; align-items:center; gap:13px; font-weight:800; letter-spacing:.05em; }
+        .logo-mark {
+            width: 38px; height: 38px; display:grid; place-items:center;
+            border-radius:50%; background:#d7ff54; color:#0754c6;
+            font-family:Georgia,serif; font-size:23px; font-weight:900;
+        }
+        .home-link { color:#fff; text-decoration:none; display:flex; align-items:center; gap:13px; }
+        .logo small { display:block; margin-top:2px; color:rgba(255,255,255,.58); font-size:10px; letter-spacing:.16em; }
+        nav { background:#fffdf8; border-bottom-color:rgba(7,26,53,.14); overflow-x:auto; padding-inline:22px; }
+        .nav-btn { color:#667085; white-space:nowrap; }
+        .nav-btn.active { color:#0754c6; border-bottom-color:#0754c6; }
+        main { padding:42px; }
+        .btn-p { background:#0754c6; border-radius:2px; box-shadow:4px 4px 0 #071a35; }
+        .btn-p:hover { transform:translate(-1px,-1px); box-shadow:6px 6px 0 #071a35; }
+        .btn-light { background:#e9f1ff; color:#0754c6; border-color:#b9cdef; box-shadow:none; }
+        .mode-card, .big-mode-card, .chapter-card, .item-card, .panel-card,
+        .progress-panel, .score-chart, .opt { border-radius:3px; }
+        .big-mode-card.active, .chapter-card:hover { border-color:#0754c6; }
+        .global-watermark {
+            width:320px; height:320px; display:grid; place-items:center;
+            color:#0754c6; font-family:Georgia,serif; font-size:110px; font-weight:900;
+            border:8px double #0754c6; border-radius:50%; opacity:.035;
+            transform:translate(-50%,-50%) rotate(-12deg);
+        }
+        @media (max-width: 768px) {
+            .app { width:100%; min-height:100vh; margin:0; border:0; box-shadow:none; }
+            header { padding:14px 17px; }
+            main { padding:26px 18px 44px; }
+            nav { padding-inline:6px; }
+            .nav-btn { padding:13px 15px; font-size:14px; }
+            #page-login { padding-top:36px !important; }
+            #user-input { width:min(100%, 300px) !important; margin-bottom:12px; }
+            .q-text { font-size:19px; }
+        }
+
     </style>
 </head>
 <body>
 
-<img class="global-watermark" src="https://www.tju.edu.cn/images/logo.png" alt="TJU">
+<div class="global-watermark" aria-hidden="true">T</div>
 
 <div class="app">
-    <header><div class="logo">I love TJU | 客观题答题系统</div><div id="u-tag"></div></header>
+    <header><div class="logo"><a class="home-link" href="./"><span class="logo-mark">T</span><span>TJU QUIZ HUB<small>天大刷题站 · 返回首页</small></span></a></div><div id="u-tag"></div></header>
     <nav id="main-nav">
         <button class="nav-btn" id="nav-prepare" onclick="goPrepare('normal')">练习中心</button>
         <button class="nav-btn" id="nav-history" onclick="switchPage('history')">历史记录</button>

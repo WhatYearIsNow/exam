@@ -1,20 +1,35 @@
 {
   "name": "tju-quiz-hub-site",
   "version": "0.1.0",
+  "description": "天津大学多科目客观题刷题站",
   "private": true,
+  "license": "MIT",
+  "homepage": "https://github.com/WhatYearIsNow/TJU-Quiz-Hub#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WhatYearIsNow/TJU-Quiz-Hub.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WhatYearIsNow/TJU-Quiz-Hub/issues"
+  },
+  "packageManager": "npm@11.12.1",
   "engines": {
     "node": ">=22.13.0"
   },
   "scripts": {
+    "sync:static": "node tooling/sync-static-assets.mjs",
+    "sync:check": "node tooling/sync-static-assets.mjs --check",
+    "predev": "npm run sync:static",
     "dev": "vinext dev",
+    "prebuild": "npm run sync:static",
     "build": "vinext build",
     "start": "vinext start",
-    "test": "npm run build && node --test tests/rendered-html.test.mjs",
-    "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
-    "db:generate": "drizzle-kit generate"
+    "lint": "eslint . --max-warnings=0",
+    "typecheck": "tsc --noEmit --incremental false",
+    "test": "node --test",
+    "check": "npm run sync:check && npm run lint && npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
-    "drizzle-orm": "0.45.2",
     "next": "16.2.6",
     "react": "19.2.6",
     "react-dom": "19.2.6"
@@ -27,7 +42,6 @@
     "@types/react-dom": "19.2.3",
     "@vitejs/plugin-react": "6.0.2",
     "@vitejs/plugin-rsc": "0.5.26",
-    "drizzle-kit": "0.31.10",
     "eslint": "9.39.4",
     "eslint-config-next": "16.2.6",
     "react-server-dom-webpack": "19.2.6",
