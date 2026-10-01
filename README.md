@@ -3,6 +3,8 @@
 [![CI](https://github.com/WhatYearIsNow/TJU-Quiz-Hub/actions/workflows/ci.yml/badge.svg)](https://github.com/WhatYearIsNow/TJU-Quiz-Hub/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
+> ⚠️ **项目状态（2026-10-01）：已暂停更新并归档**。2026-08 起新增 `physics-quiz/`（大学物理）与 `probability-quiz/`（概率论）两个自包含子站，根目录 `index.html` 独立刷题页已移除；本文档其余部分描述的是主线托管站。**完整现状、遗留问题与恢复指南见 [PROJECT-STATUS.md](PROJECT-STATUS.md)。**
+
 天津大学多科目客观题刷题站，支持章节练习、综合训练、模拟考试、错题回顾和成绩追踪。
 
 项目包含两个互补入口：
