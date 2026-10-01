@@ -5,10 +5,14 @@
 > **去向**：功能已被部署在 **KVM 虚拟机上的 I love TJU** 站点取代（2026-10-01 补记）。本仓库降级为历史参考实现与题库数据源。
 > 接手顺序：先读完本文档 → 再看 README.md → 细节按下文「恢复开发指南」查阅。
 
-## 去向与继任（2026-10-01 补记）
+## 去向与继任（2026-10-01 补记，已核实）
 
-- 继任者：**I love TJU**，部署在用户自有的 KVM 虚拟机上；访问地址与源码位置未记录在本地，**待补**（问到后回填此处）。
-- 名称血缘：I love TJU 最早是 2026-04 的单文件 Python 题库（本仓库 `archive/I love TJU.html`，知识库条目「[[北洋答题系统]]」）；KVM 上的现役站点沿用此名，与本仓库代码的具体承继关系待确认。
+- 继任者：**I love TJU**（三合一刷题中心），访问地址 **http://kvm19.tjucloud.sbs:8900**（2026-10-01 验证 HTTP 200；2026-09-23 上线）。
+- 部署位置：用户自有 KVM，SSH 别名 `kvm19`（kvm19.tjucloud.sbs，root 密钥登录）
+  - 前端：`/var/www/i-love-tju/index.html`（约 6.2MB 单文件站，同目录留有多份 .bak 备份）；另经 Caddy（`/etc/caddy/Caddyfile`）在主域 80 端口挂了 `/exam`（指向 `/var/www/i-love-tju/exam`）与 `/exam/shell`（完整版）路由
+  - 后端：systemd 单元 `i-love-tju-api.service` 运行 `/opt/toy/i-love-tju/server.py`（python3，监听 127.0.0.1:8901），Caddy 反代 `/sync`（作答记录多端同步）与 `/api`（存疑/备注/AI 核验）
+- ⚠️ **该站无版本管理**：`/var/www/i-love-tju` 非 git 仓库，GitHub 备份仓库 WhatYearIsNow/tju-server-backup 也未包含它；改动前务必备份 index.html。
+- 名称血缘：I love TJU 最早是 2026-04 的单文件 Python 题库（本仓库 `archive/I love TJU.html`，知识库条目「[[北洋答题系统]]」）；现役站点沿用此名，与本仓库代码的具体承继关系待确认。
 - 对接手者的含义：默认不要在本仓库上继续开发，刷题功能看 KVM 上的 I love TJU。本仓库的留存价值：① physics/probability 题库 JSON 与 source 源文件可直接复用；② 构建脚本与 Playwright 验证流程；③ 云同步 Worker 方案。
 
 ## 一句话定位
