@@ -2146,13 +2146,40 @@ function renderPractice(){
   var _sameQ=(renderPractice._lastQid===qid);
   var _st=_sameQ?main.scrollTop:0;
   var _folds=_sameQ?Array.prototype.map.call(main.querySelectorAll('.ansbox.ana-fold'),function(el){return el.classList.contains('open');}):null;
-  main.innerHTML=html;
+
+  // 卡片排版缓存：题面卡（qcard）按作答状态复用已排版 DOM，切题与回看不重复 KaTeX 渲染。
+  // 卡片内容由 qid + 模式 + 作答状态唯一决定，记录字段变化（含云端合并）都会反映在缓存键里。
+  var _cut=html.indexOf('<div class="qcard">');
+  var _ckey=[qid,mode,redoing?1:0,answered?1:0,peeked?1:0,rv.revealed?1:0,
+    rv.my||'',rv.wrong===undefined?'':(rv.wrong?1:0),prevSel||'',
+    vok===undefined?'':(vok?1:0),
+    (typeof multiSel!=='undefined'?(multiSel[qid]||''):'')].join('|');
+  if(!renderPractice._cards)renderPractice._cards=new Map();
+  var _cached=renderPractice._cards.get(_ckey);
+  var _cardEl;
+  main.innerHTML=html.slice(0,_cut);
+  if(_cached){
+    _cardEl=_cached;
+    main.appendChild(_cardEl);
+  }else{
+    main.insertAdjacentHTML('beforeend',html.slice(_cut));
+    _cardEl=main.lastElementChild;
+    renderPractice._cards.set(_ckey,_cardEl);
+    if(renderPractice._cards.size>24)renderPractice._cards.delete(renderPractice._cards.keys().next().value);
+    // 分阶段排版：题干与选项先行（立即可读可答），答案/解析推迟一帧补齐
+    applyMath(_cardEl.querySelector('.qbody'));
+    var _optsEl=_cardEl.querySelector('.opts');
+    if(_optsEl)applyMath(_optsEl);
+    requestAnimationFrame(function(){
+      var _cts=_cardEl.querySelectorAll('.ansbox .ct');
+      for(var _ci=0;_ci<_cts.length;_ci++)applyMath(_cts[_ci]);
+    });
+  }
   if(_sameQ&&_folds&&_folds.length){
-    var _nf=main.querySelectorAll('.ansbox.ana-fold');
+    var _nf=_cardEl.querySelectorAll('.ansbox.ana-fold');
     for(var _fi=0;_fi<Math.min(_folds.length,_nf.length);_fi++){if(_folds[_fi])_nf[_fi].classList.add('open');}
   }
   renderPractice._lastQid=qid;
-  applyMath($('main'));
   main.scrollTop=_st;
 }
 
