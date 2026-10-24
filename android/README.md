@@ -7,8 +7,9 @@
 - `java/com/tju/quizhub/`：Activity、WebView 回调和 JavaScript 导出接口。
 - `res/`：图标与主题。
 - `assets/offline.html`：离线页模板；构建时替换站点地址。
-- `AndroidManifest.xml`：包名 `com.tju.quizhub`，版本 `2.3`，最低 Android 7.0 / API 24。
+- `AndroidManifest.xml`：包名 `com.tju.quizhub`，版本 `2.4`（versionCode 24），最低 Android 7.0 / API 24。
 - `build.py`：命令行构建入口。
+- `sign.py`：签名、校验，以及与旧 APK 的升级身份比对。
 
 ## 构建
 
@@ -23,18 +24,30 @@ python3 android/build.py --sdk /path/to/android-sdk --url https://example.com/
 
 站点地址必须显式指定，主页面、站内链接判断和离线重试均使用同一份配置。`BuildConfig.java` 在临时构建目录生成，无需修改 Java 源文件。运行 `python3 android/build.py --help` 查看 SDK 版本和输出目录参数。
 
-产物默认写入 `android/build/local/ILoveTJU-2.3-local-unsigned.apk`，已经过 zipalign，尚未签名。脚本不会读取签名密钥，也不会覆盖历史 APK 和原有 `build/` 文件。
+产物默认写入 `android/build/local/ILoveTJU-2.4-local-unsigned.apk`，已经过 zipalign，尚未签名。脚本不会读取签名密钥，也不会覆盖历史 APK 和原有 `build/` 文件。
 
-安装前，用自己的密钥通过 SDK 的 `apksigner` 签名，例如：
+安装前，用现有密钥签名。更新已有安装时，使用原证书和递增的 versionCode；传入旧 APK 后，脚本会校验证书、包名和版本号，不匹配时不会写入发布文件。
 
 ```bash
-"$ANDROID_HOME/build-tools/34.0.0/apksigner" sign \
-  --ks /path/to/your-release.jks \
-  --out android/build/local/ILoveTJU-2.3.apk \
-  android/build/local/ILoveTJU-2.3-local-unsigned.apk
+python3 android/sign.py android/build/local/ILoveTJU-2.4-local-unsigned.apk \
+  --sdk /path/to/android-sdk \
+  --keystore /path/to/your-release.jks \
+  --ks-pass env:EXAM_ANDROID_STORE_PASSWORD \
+  --previous-apk /path/to/ILoveTJU-2.3.apk \
+  --out android/build/local/ILoveTJU-2.4.apk
 ```
 
+`EXAM_ANDROID_STORE_PASSWORD` 通过本地安全方式注入；也支持 `--ks-pass file:/path/to/private-password-file`。不要把密码、私钥或包含密码的命令提交到 Git。`--alias` 可选择密钥；私钥密码不同时另用 `--key-pass env:变量名` 或 `file:路径` 指定。
+
 签名密钥与构建产物均不提交 Git。迁移保留的历史 APK 仍对应原来的站点地址，改地址后需要重新构建、签名并安装。
+
+## 发布与设备验收
+
+当前站点限校园网或可访问该内网的网络使用。发布包应使用实际可访问的站点地址；使用内部 CA 的 HTTPS 还需要设备信任该证书，不能直接当作公开受信任 HTTPS。
+
+同签名升级能保留应用安装数据，但 WebView 的本地存储按站点 origin 区分。更换域名或端口前，先同步或导出未同步的作答记录；不要把安装数据保留等同于新域名自动读到旧记录。
+
+真机验收应覆盖三科加载、作答和重启留存、云端同步、AI 核验、音量键切题、文件导出、离线重试，以及从上一版本直接安装升级。编译和签名通过不等同于这些流程已经在设备上通过。
 
 ## 与网页的接口
 

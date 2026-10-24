@@ -42,6 +42,8 @@ python3 server.py
 - [开发说明](docs/development.md)：原生页面、重建流程与测试。
 - [部署说明](docs/deployment.md)：配置、API、Caddy 和 systemd。
 - [PDF 与离线包](docs/offline-book.md)：章节汇编、TeX 依赖和已知限制。
+- [PDF 后续工作](docs/pdf-roadmap.md)：物理题图、马原多选题与整科输出的具体缺口。
+- [题库来源与授权](docs/content-rights.md)：代码许可、题目材料和人工修正如何分别处理。
 - [Android 说明](android/README.md)：原生壳的构建与配置。
 
 运行后端与前端配置检查（前端行为测试需要 Node.js，运行网站本身不需要）：

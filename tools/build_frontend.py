@@ -9,6 +9,7 @@
 """
 import argparse
 import base64
+import json
 import os
 import re
 from pathlib import Path
@@ -63,12 +64,32 @@ def build_frontend(web_dir, exam_dir):
     shell = shell_path.read_text(encoding='utf-8')
     for subj in SUBJECTS:
         raw = (exam_dir / (subj + '.html')).read_bytes()
+        data_match = re.search(r'<script\b[^>]*\bid=["\']' + subj
+                               + r'-data["\'][^>]*>(.*?)</script>', raw.decode('utf-8'), re.S)
+        if not data_match:
+            raise ValueError(f'{subj}.html 缺少题库 JSON')
+        questions = json.loads(data_match.group(1)).get('questions')
+        if not isinstance(questions, list):
+            raise ValueError(f'{subj}.html 题库 questions 必须是列表')
+        count = len(questions)
+        button_pattern = re.compile(r'(<button\b[^>]*\bdata-page=["\']' + subj
+                                    + r'["\'][^>]*>)(.*?)(</button>)', re.S)
+        count_pattern = re.compile(r'(<span\b[^>]*\bclass=["\'][^"\']*\btab-meta\b[^"\']*["\'][^>]*>)(.*?)(</span>)', re.S)
+        def update_count(match):
+            body, changed = count_pattern.subn(lambda label: label.group(1) + str(count)
+                                               + ' 道题' + label.group(3), match.group(2), count=1)
+            if not changed:
+                raise ValueError(f'首页 {subj} 按钮缺少 tab-meta 题量标签')
+            return match.group(1) + body + match.group(3)
+        shell, changed = button_pattern.subn(update_count, shell, count=1)
+        if not changed:
+            raise ValueError(f'首页缺少 {subj} 学科按钮')
         b64 = base64.b64encode(raw).decode()
         pat = re.compile(r'(<script[^>]*id=["\']payload-' + subj + r'["\'][^>]*>)(.*?)(</script>)', re.S)
         if not pat.search(shell):
             raise ValueError(f'payload-{subj} block not found in {shell_path}')
         shell = pat.sub(lambda m: m.group(1) + b64 + m.group(3), shell, count=1)
-        print(f'[OK] payload-{subj} -> {len(b64)} chars (src {len(raw)} bytes)')
+        print(f'[OK] payload-{subj} -> {len(b64)} chars (src {len(raw)} bytes, {count} questions)')
     with shell_path.open('w', encoding='utf-8', newline='') as f:
         f.write(shell)
     print(f'[OK] shell rebuilt: {shell_path}')

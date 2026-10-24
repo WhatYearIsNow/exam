@@ -13,6 +13,8 @@ python3 tools/build_frontend.py
 python3 server.py
 ```
 
+重建脚本同时从各科题库 JSON 计算首页的题量标签，避免页面文案与实际题数不一致。
+
 直接访问 `/exam/` 可调试科目裸页，访问 `/` 检查首页中的实际效果。首页自身的顶栏和增强功能直接在 `web/index.html` 中维护，重建脚本只更新其中的 `payload-*` 内容。
 
 可选样式版本由 `python3 tools/build_premium.py` 生成到 `web/premium/`。这是生成目录，修改应落在科目源页面或构建脚本中。

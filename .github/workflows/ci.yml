@@ -22,6 +22,14 @@ jobs:
           package-manager-cache: false
       - name: Test server and frontend configuration
         run: python3 -m unittest discover -s tests -v
+      - name: Check frontend payloads and question counts
+        run: |
+          python3 tools/build_frontend.py
+          git diff --exit-code -- web/index.html web/exam/index.html
+      - name: Check Android command-line helpers
+        run: |
+          python3 android/build.py --help
+          python3 android/sign.py --help
       - name: Inspect question banks
         run: |
           python3 tools/make_book.py --subject marx --inspect

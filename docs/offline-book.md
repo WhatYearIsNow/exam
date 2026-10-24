@@ -44,7 +44,9 @@ python3 tools/package_offline.py
 
 ## 已知限制
 
-- 目前仅概率论配置了 `MOCK_SOURCE`，马原和物理可检查题库，生成 PDF 前须补充真实来源配置。
+- 生成器目前固定要求 `MOCK_SOURCE`；实际物理和马原没有模拟卷，应先按真实卷次调整这项门槛。马原还需补充来源名称解析及 95 道多选题的支持。
 - 物理题的内嵌 base64 图片尚未接入 PDF 插图流程，不能保证图题完整排版。
 - 尚不支持把所有章节合成一本 PDF。
 - `bank-data-export/` 的历史修正及个人 `corr` 记录不自动合并；离线包反映的是打包时的 `bank-data/` 快照。
+
+各科差异、附图与整本输出的后续工作见 [PDF 汇编现状](https://github.com/WhatYearIsNow/exam/blob/main/docs/pdf-roadmap.md)。
