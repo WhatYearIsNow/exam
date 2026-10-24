@@ -14,6 +14,8 @@ import zipfile
 
 
 ROOT = Path(__file__).resolve().parent
+ANDROID_NS = 'http://schemas.android.com/apk/res/android'
+ET.register_namespace('android', ANDROID_NS)
 
 
 def exam_url(value):
@@ -49,8 +51,28 @@ def build(args):
 
     output = args.out.expanduser().resolve()
     output.mkdir(parents=True, exist_ok=True)
-    manifest = ET.parse(ROOT / "AndroidManifest.xml").getroot()
-    version = manifest.attrib["{http://schemas.android.com/apk/res/android}versionName"]
+    manifest_tree = ET.parse(ROOT / "AndroidManifest.xml")
+    manifest = manifest_tree.getroot()
+    source_package = manifest.attrib['package']
+    version = manifest.attrib['{' + ANDROID_NS + '}versionName']
+    if args.preview:
+        if not 1 <= args.preview_build <= 999:
+            raise ValueError('预览版构建编号须为 1 到 999')
+        version += '-preview.' + str(args.preview_build)
+        version_code = int(manifest.attrib['{' + ANDROID_NS + '}versionCode']) * 1000 + args.preview_build
+        if version_code > 2100000000:
+            raise ValueError('预览版 versionCode 超出 Android 上限')
+        manifest.set('package', source_package + '.preview')
+        manifest.set('{' + ANDROID_NS + '}versionName', version)
+        manifest.set('{' + ANDROID_NS + '}versionCode', str(version_code))
+        application = manifest.find('application')
+        if application is None:
+            raise ValueError('AndroidManifest.xml 缺少 application')
+        application.set('{' + ANDROID_NS + '}label', 'Exam 测试版')
+        for component in application:
+            name = component.get('{' + ANDROID_NS + '}name', '')
+            if name.startswith('.'):
+                component.set('{' + ANDROID_NS + '}name', source_package + name)
     destination = output / ("ILoveTJU-" + version + "-local-unsigned.apk")
     parsed = urllib.parse.urlsplit(args.url)
 
@@ -59,8 +81,11 @@ def build(args):
         work = Path(temporary)
         generated = work / "generated"
         generated.mkdir()
+        build_manifest = work / 'AndroidManifest.xml'
+        manifest_tree.write(build_manifest, encoding='utf-8', xml_declaration=True)
         assets = work / "assets"
         shutil.copytree(ROOT / "assets", assets)
+        shutil.copy2(ROOT.parent / 'LICENSE', assets / 'LICENSE.txt')
         page = assets / "offline.html"
         url_json = json.dumps(args.url, ensure_ascii=True)
         script_url = url_json.replace("<", "\\u003c").replace(">", "\\u003e").replace("&", "\\u0026")
@@ -80,7 +105,8 @@ def build(args):
         resources = work / "resources.apk"
         run(tools / "aapt2", "compile", "--dir", ROOT / "res", "-o", compiled)
         run(tools / "aapt2", "link", "-o", resources, "--manifest",
-            ROOT / "AndroidManifest.xml", "-I", platform, "--java", generated,
+            build_manifest, "-I", platform, "--java", generated,
+            "--custom-package", source_package,
             "-A", assets, compiled)
         classes = work / "classes"
         classes.mkdir()
@@ -116,6 +142,10 @@ def main():
     parser.add_argument("--build-tools", default="34.0.0", help="SDK build-tools 版本（默认 34.0.0）")
     parser.add_argument("--out", type=Path, default=ROOT / "build" / "local",
                         help="输出目录，默认 android/build/local")
+    parser.add_argument('--preview', action='store_true',
+                        help='构建独立安装的测试版（独立包名和应用名，正式包名不变）')
+    parser.add_argument('--preview-build', type=int, default=1,
+                        help='预览构建编号 1..999；仅与 --preview 一起使用')
     args = parser.parse_args()
     if not args.url:
         parser.error("请通过 --url 或 EXAM_URL 显式指定部署站点")

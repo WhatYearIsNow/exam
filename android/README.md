@@ -41,6 +41,23 @@ python3 android/sign.py android/build/local/ILoveTJU-2.4-local-unsigned.apk \
 
 签名密钥与构建产物均不提交 Git。迁移保留的历史 APK 仍对应原来的站点地址，改地址后需要重新构建、签名并安装。
 
+## 独立安装的测试版
+
+当前测试包见 [Android 2.4 预览版 1](https://github.com/WhatYearIsNow/exam/releases/tag/android-v2.4-preview.1)。真机验收由测试者在设备上进行。
+
+正式签名库尚未解锁时，可以用独立预览身份提供手机测试，不替换正式版的签名或包名：
+
+```bash
+python3 android/build.py --sdk /path/to/android-sdk \
+  --url http://your-exam-site/ --preview --preview-build 1
+```
+
+当前源版本 2.4 对应预览版本 `2.4-preview.1`、versionCode `24001`，包名为 `com.tju.quizhub.preview`，桌面名称为“Exam 测试版”。正式版仍为 `com.tju.quizhub`。预览版使用单独的本地签名库，之后更新预览版时复用该库并递增 `--preview-build`；仍通过 `sign.py` 校验签名输出。
+
+两种应用可同时安装，本地 WebView 数据分开保存。预览版连接的站点和云端服务仍由构建 URL 决定；连接现有站点时，云端同步仍会影响该服务中的对应同步记录。预览版不能作为原正式版的覆盖升级包。
+
+测试时请检查三科加载、公式和附图、作答及重启留存、同步与备注、音量键切题、文件导出和断网后的重试。完整正式版升级检查仍需使用原正式签名。
+
 ## 发布与设备验收
 
 当前站点限校园网或可访问该内网的网络使用。发布包应使用实际可访问的站点地址；使用内部 CA 的 HTTPS 还需要设备信任该证书，不能直接当作公开受信任 HTTPS。
