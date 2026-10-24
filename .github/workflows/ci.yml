@@ -30,10 +30,5 @@ jobs:
         run: |
           python3 android/build.py --help
           python3 android/sign.py --help
-      - name: Inspect question banks
-        run: |
-          python3 tools/make_book.py --subject marx --inspect
-          python3 tools/make_book.py --subject physics --inspect
-          python3 tools/make_book.py --subject probability --inspect
-      - name: Build offline distribution
-        run: python3 tools/package_offline.py
+      - name: Validate and export webpage question banks
+        run: python3 tools/extract_bank.py --out "$RUNNER_TEMP/exam-bank-data"

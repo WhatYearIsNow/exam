@@ -17,7 +17,7 @@
 
 TJU-Quiz-Hub 的主线提供纯前端刷题框架、外置题库和 Flask 参考方案，网站开发分支另外保留了其站点构建探索。当前 `exam` 以原生 HTML/CSS/JavaScript、Python 标准库后端和原生 Java Android 壳继续开发。
 
-当前工作区统一维护 `web/` 页面、`server.py`、`android/`、PDF 工具和部署说明。旧版 Flask 参考方案及网站框架保留在历史版本中，当前运行方式以根目录 README 为准。
+当前工作区维护 `web/` 页面、`server.py`、`android/` 和部署说明，并提供题库数据导出。迁入的 PDF 工具作为历史交接资料保留，完整题册生产归 `zhenti-pipeline-v2`。旧版 Flask 参考方案及网站框架保留在历史版本中，当前运行方式以根目录 README 为准。
 
 根目录 MIT 许可证同时保留 TJU-Quiz-Hub 的原版权声明。题库材料及其他第三方组件的说明见 [第三方与内容说明](../THIRD_PARTY_NOTICES.md)。
 

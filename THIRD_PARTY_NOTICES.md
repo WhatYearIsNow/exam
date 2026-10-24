@@ -13,6 +13,8 @@
 
 ## PDF 排版组件
 
+以下组件随旧离线包迁入，作为历史交接资料保留。PDF 生产开发归 `zhenti-pipeline-v2`；这些组件不是 `exam` 网页运行依赖，其原有许可仍随文件保留。
+
 | 组件 | 本地位置 | 许可与来源 |
 | --- | --- | --- |
 | exam-zh 0.3.6 | `vendor/exam-zh/` | LaTeX Project Public License 1.3c，见目录内 `LICENSE`；[完整上游项目](https://github.com/xkwxdyy/exam-zh/tree/v0.3.6) |

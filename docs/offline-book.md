@@ -1,4 +1,6 @@
-# 真题分类汇编与离线包
+# 历史资料：真题分类汇编与离线包
+
+本文保留迁入旧离线包的使用说明，供历史查阅与交接。完整 PDF 题册、附图、排版、来源解析、目录和页码的开发归 `zhenti-pipeline-v2`，不属于 `exam` 的开发任务或 CI 检查。下文的生成命令不作为本项目的日常开发流程；`exam` 的数据交接方式见 [题库数据交接](https://github.com/WhatYearIsNow/exam/blob/main/docs/data-handoff.md)。
 
 按教材章节生成 exam-zh / XeLaTeX 排版的 PDF。下列命令从源码仓库根目录，或离线包解压后的 `exam-compilation/` 目录执行。
 
@@ -42,11 +44,13 @@ python3 tools/package_offline.py
 
 原创代码采用 MIT；题库和第三方组件分别适用自身的授权条件，详见包内 `THIRD_PARTY_NOTICES.md` 和 `licenses/`。
 
-## 已知限制
+## 迁入副本的历史检查记录
+
+以下仅描述迁入的旧脚本，不代表 `zhenti-pipeline-v2` 的当前实现状态，也不列入 `exam` 待办。
 
 - 生成器目前固定要求 `MOCK_SOURCE`；实际物理和马原没有模拟卷，应先按真实卷次调整这项门槛。马原还需补充来源名称解析及 95 道多选题的支持。
 - 物理题的内嵌 base64 图片尚未接入 PDF 插图流程，不能保证图题完整排版。
 - 尚不支持把所有章节合成一本 PDF。
 - `bank-data-export/` 的历史修正及个人 `corr` 记录不自动合并；离线包反映的是打包时的 `bank-data/` 快照。
 
-各科差异、附图与整本输出的后续工作见 [PDF 汇编现状](https://github.com/WhatYearIsNow/exam/blob/main/docs/pdf-roadmap.md)。
+原检查记录见 [PDF 文件归属说明](https://github.com/WhatYearIsNow/exam/blob/main/docs/pdf-roadmap.md)，相关实现应在 `zhenti-pipeline-v2` 中核对和推进。

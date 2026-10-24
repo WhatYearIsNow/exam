@@ -4,6 +4,8 @@
 
 本仓库是 [TJU-Quiz-Hub](https://github.com/WhatYearIsNow/TJU-Quiz-Hub) 的后续开发版本，保留其原始提交历史。旧版源码可通过 [legacy-tju-quiz-hub 标签](https://github.com/WhatYearIsNow/exam/tree/legacy-tju-quiz-hub) 查看；原有分支与版本关系见 [项目沿革](docs/history.md)。
 
+`exam` 维护网页题库和答题功能，保留经过确认的题目修正，并按需导出题库供 `zhenti-pipeline-v2` 使用。完整 PDF 题册及其附图、排版、来源解析、目录和页码由 `zhenti-pipeline-v2` 负责；迁入的 PDF 相关文件作为历史交接资料保留。
+
 ## 本地运行
 
 在项目根目录执行：
@@ -18,7 +20,7 @@ python3 server.py
 
 上述复制命令保留已有配置；已有部署直接使用原配置即可。
 
-需要 Python 3.8+，无需安装第三方 Python 库。题库、图片和公式渲染资源已内嵌于页面；同步与 AI 核验需要相应服务可用。PDF 编译另需 TeX Live。
+需要 Python 3.8+，无需安装第三方 Python 库。题库、图片和公式渲染资源已内嵌于页面；同步与 AI 核验需要相应服务可用。运行 `exam` 和导出题库均不需要 TeX Live。
 
 ## 目录
 
@@ -26,9 +28,9 @@ python3 server.py
 | --- | --- |
 | `web/` | 首页与各科原生 HTML；`web/exam/` 是题库和页面功能的开发入口 |
 | `server.py` | 同端口提供静态页面、同步、注解和 AI 核验 API |
-| `tools/` | 首页重建、样式版本构建、题库快照、PDF 和离线打包工具 |
-| `bank-data/` | 从 HTML 提取的题库快照，供缺少裸页时使用 |
-| `vendor/` | PDF 使用的第三方 LaTeX 组件和字体 |
+| `tools/` | 首页重建、样式版本构建和题库导出；另保留迁入的历史 PDF 脚本供交接 |
+| `bank-data/` | 从网页题库提取的 JSON 快照 |
+| `vendor/` | 随历史 PDF 文件迁入的 LaTeX 组件和字体，不是网页运行依赖 |
 | `android/` | Android 原生 WebView 壳与构建说明 |
 | `deploy/` | Caddy 示例和 systemd 服务文件 |
 | `tests/` | 使用临时目录启动实际后端的集成测试 |
@@ -41,8 +43,7 @@ python3 server.py
 - [项目沿革](docs/history.md)：TJU-Quiz-Hub 与 exam 的延续关系、旧版标签及历史分支。
 - [开发说明](docs/development.md)：原生页面、重建流程与测试。
 - [部署说明](docs/deployment.md)：配置、API、Caddy 和 systemd。
-- [PDF 与离线包](docs/offline-book.md)：章节汇编、TeX 依赖和已知限制。
-- [PDF 后续工作](docs/pdf-roadmap.md)：物理题图、马原多选题与整科输出的具体缺口。
+- [题库数据交接](docs/data-handoff.md)：与 `zhenti-pipeline-v2` 的职责边界、导出方式和修正保留规则。
 - [题库来源与授权](docs/content-rights.md)：代码许可、题目材料和人工修正如何分别处理。
 - [Android 说明](android/README.md)：原生壳的构建与配置。
 
@@ -52,7 +53,7 @@ python3 server.py
 python3 -m unittest discover -s tests -v
 ```
 
-GitHub Actions 配置会在推送和 PR 时运行测试、题库检查及离线打包。
+GitHub Actions 在推送和 PR 时运行网页与后端测试、首页重建一致性检查、Android 工具入口检查和题库数据导出校验。
 
 ## 许可
 

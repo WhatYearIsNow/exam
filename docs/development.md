@@ -2,6 +2,8 @@
 
 前端直接编辑 HTML、CSS 和 JavaScript，无 npm 构建步骤。后端和工具脚本使用 Python 标准库。
 
+本项目维护网页题库、答题功能和经过确认的题目修正，并按需提供题库数据。PDF 题册及其生成流程属于 `zhenti-pipeline-v2`，相关文件的迁入检查不构成 `exam` 的开发待办。
+
 ## 页面与题库
 
 `web/exam/marx.html`、`physics.html`、`probability.html` 分别包含各科页面逻辑和 `<subject>-data` JSON 题库。`web/exam/index.html` 是 iframe 切换入口；`web/index.html` 是站点首页，内嵌了三科页面的 base64 副本。
@@ -27,10 +29,9 @@ python3 server.py
 
 ```bash
 python3 tools/extract_bank.py
-python3 tools/make_book.py --subject probability --inspect
 ```
 
-PDF 工具优先读取 HTML；相应 HTML 不存在时才读取 `bank-data/`。HTML 格式错误会报错，不会悄悄改用旧快照。
+向其他项目提供数据时，使用 `--out` 导出到独立目录，避免无意刷新本地快照。文件格式和交接规则见 [题库数据交接](data-handoff.md)。
 
 `data/` 保存同步记录和个人注解，包含手动改题及 AI 采纳结果；它们与题库源文件分开保存。`bank-data-export/` 是历史修正导出，尚未作为本次整理的一部分合并。更新题库前应逐题核对修正来源。
 
@@ -45,8 +46,8 @@ python3 -m unittest discover -s tests -v
 
 集成测试在临时目录启动服务，检查静态页面、鉴权、同步合并、注解和环境配置，不调用真实 AI。前端配置行为测试通过 Node.js 执行真实增强层，需要在 PATH 中提供 Node.js；它不替代浏览器视觉和交互检查。页面修改还需在浏览器检查桌面和手机布局、公式、切题及作答流程。
 
-GitHub Actions 在推送和 PR 时运行上述测试、三科 `--inspect` 和离线包生成。无需为运行网站安装 npm 依赖。
+GitHub Actions 在推送和 PR 时运行上述测试、首页重建一致性检查、Android 工具入口检查和题库提取校验。无需为运行网站安装 npm 依赖。
 
 ## 本次目录整理
 
-站点文件已归入 `web/`，Android 源码归入 `android/`，离线包所需组件归入 `vendor/`。旧离线包、备份和迁移档案保存在忽略的 `.local/` 下。原站点路径和 Android 临时路径保留了兼容符号链接，后续开发使用项目内路径。
+站点文件已归入 `web/`，Android 源码归入 `android/`。迁入的 PDF 脚本和 `vendor/` 组件作为历史交接资料保留，生产开发归 `zhenti-pipeline-v2`。旧离线包、备份和迁移档案保存在忽略的 `.local/` 下。原站点路径和 Android 临时路径保留了兼容符号链接，后续开发使用项目内路径。
