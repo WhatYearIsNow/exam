@@ -1,0 +1,19 @@
+# Replace example.com and the project path for your installation.
+example.com {
+    encode gzip
+
+    @backend path /sync /sync/* /api/* /health
+    handle @backend {
+        reverse_proxy 127.0.0.1:8901
+    }
+
+    handle {
+        root * /opt/toy/i-love-tju/web
+        file_server
+    }
+
+    header {
+        X-Content-Type-Options nosniff
+        Referrer-Policy no-referrer
+    }
+}

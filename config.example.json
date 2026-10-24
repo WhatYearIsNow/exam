@@ -1,0 +1,9 @@
+{
+  "app_token": "",
+  "tju_llm_base": "https://ai.tju.edu.cn/api/v3",
+  "tju_llm_key": "",
+  "tju_llm_model": "tju-llm",
+  "llm_base": "https://api.deepseek.com",
+  "llm_key": "",
+  "llm_model": "deepseek-chat"
+}

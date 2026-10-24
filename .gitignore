@@ -1,25 +1,39 @@
-# OS generated files
-.DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
-Thumbs.db
-Desktop.ini
+# Private configuration and personal study data
+/config.json
+/.env
+/.env.*
+!/.env.example
+/data/*
+!/data/.gitkeep
+/web/config.local.js
+/web/dl/
 
-# Editor files
-*.swp
-*.swo
-*~
-.vscode/
-.idea/
+# Local archives, migration records, and generated distributions
+/.local/
+/book/
+/bank-data-export/
+/exam-compilation/
+/exam-compilation.zip
+/web/premium/
+*.apk
+*.apk.idsig
+*.idsig
+*.zip
+*.bak
+*.bak-*
+*.pre-*
 
-# Python
+# Python and Android build output / signing credentials
 __pycache__/
-*.pyc
-*.pyo
-*.db
+*.py[cod]
+.venv/
+/android/build/
+/android/.gradle/
+/android/local.properties
+*.keystore
+*.jks
 
-# Node (if someone adds build tools later)
-node_modules/
+# Editor and operating system files
+.DS_Store
+.idea/
+.vscode/

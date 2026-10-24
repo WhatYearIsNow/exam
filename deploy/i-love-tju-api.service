@@ -1,0 +1,14 @@
+[Unit]
+Description=I Love TJU API (sync / annotations / AI check)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/toy/i-love-tju
+ExecStart=/usr/bin/python3 /opt/toy/i-love-tju/server.py
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target

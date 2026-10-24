@@ -1,109 +1,57 @@
-# TJU-Quiz-Hub
+# exam · I Love TJU
 
-天津大学（北洋大学）多科目客观题刷题系统 —— 一个纯前端、零依赖、开箱即用的刷题框架。
+天津大学课程刷题工具。前端使用原生 HTML、CSS 和 JavaScript，后端使用 Python 标准库；包含马原、大学物理、概率论题库，以及作答同步、题目备注、修正和 AI 核验功能。
 
-> 天大学子，一键迁移到任意科目。
+本仓库是 [TJU-Quiz-Hub](https://github.com/WhatYearIsNow/TJU-Quiz-Hub) 的后续开发版本，保留其原始提交历史。旧版源码可通过 [legacy-tju-quiz-hub 标签](https://github.com/WhatYearIsNow/exam/tree/legacy-tju-quiz-hub) 查看；原有分支与版本关系见 [项目沿革](docs/history.md)。
 
-## 特色
+## 本地运行
 
-- **零依赖** — 纯 HTML/CSS/JS，无需 Node.js、无需构建工具，双击即用
-- **单文件框架** — 核心框架 `index.html` 不到 50KB
-- **题库外置** — 题库为独立 `.js` 文件，替换即可切换科目
-- **三种刷题模式**
-  - 章节检测 — 逐章突破
-  - 综合训练 — 全部题目随机打乱
-  - 模拟考试 — 按章节比例抽题组卷（单选+多选）
-- **智能错题本** — 错题自动收录，支持重练和一键清空
-- **成绩追踪** — 历史记录 + SVG 成绩曲线
-- **断点续答** — 退出自动保存，回来继续作答
-- **响应式设计** — 手机/平板/电脑均可使用
-- **支持单选+多选** — 自动检测题库类型，适配 UI
-- **服务器模式（参考）** — 提供 Flask 后端方案，可共享答题数据，详见文档
-
-## 快速开始
-
-1. 下载或克隆本仓库
-2. 双击打开 `index.html`
-3. 输入姓名，开始刷题
-
-### 切换科目
-
-支持通过 URL 参数切换题库：
-
-```
-index.html?bank=history-264    # 中国近现代史纲要（264题，默认）
-index.html?bank=history-178    # 中国近现代史纲要（178题）
-index.html?bank=cs-python-100  # 计算机软件技术基础（Python）
-```
-
-## 可用题库
-
-| 文件 | 科目 | 题数 | 题型 |
-|------|------|------|------|
-| `banks/history-264.js` | 中国近现代史纲要 | 264 | 单选 + 多选 |
-| `banks/history-178.js` | 中国近现代史纲要 | 178 | 单选 + 多选 |
-| `banks/cs-python-100.js` | 计算机软件技术基础 | 100 | 单选 |
-
-## 自定义题库
-
-只需创建 `banks/your-subject.js`，定义题目数据即可。详见：
-
-- [题库数据格式说明](docs/data-format.md)
-- [自定义题库指南](docs/custom-quiz-guide.md)
-
-核心步骤：
-1. 复制 `banks/history-264.js` 为你的题库文件
-2. 修改 `QUIZ_META`（科目名、版本号）
-3. 替换 `questionData`（题目数组）
-4. 更新 `QUESTION_CHAPS`（章节分配）
-5. 通过 `?bank=your-subject` 使用
-
-## 项目结构
-
-```
-TJU-Quiz-Hub/
-├── index.html                   # 核心刷题框架
-├── banks/                       # 题库目录
-│   ├── history-264.js           # 中国近现代史纲要（264题）
-│   ├── history-178.js           # 中国近现代史纲要（178题）
-│   └── cs-python-100.js         # 计算机软件技术基础（Python）
-├── docs/
-│   ├── data-format.md           # 题库数据格式说明
-│   └── custom-quiz-guide.md     # 自定义题库指南
-├── archive/                     # 原始完整版 HTML（含内嵌题库，可独立使用）
-│   ├── 25262版中国近现代史纲要选择题刷题系统.html
-│   ├── 史纲选择题(178题).html
-│   └── I love TJU.html
-├── .gitignore
-└── LICENSE
-```
-
-## 浏览器兼容性
-
-支持所有现代浏览器（Chrome、Firefox、Safari、Edge）。使用 `localStorage` 存储数据，清除浏览器数据会导致记录丢失。
-
-## 参考：服务器模式（作者未实测）
-
-> ⚠️ 以下为社区参考方案，作者未在生产环境测试过，仅供参考。
-
-项目中提供了 `server.py` + `stats.html`，可将系统部署到服务器上，全班学生的答题数据自动汇总，通过 `/stats` 页面查看高频错题排行、成绩分布等。
+在项目根目录执行：
 
 ```bash
-pip install flask
-python server.py
+cp -n config.example.json config.json
+cp -n web/config.example.js web/config.local.js
+python3 server.py
 ```
 
-详见 [docs/deploy.md](docs/deploy.md)。欢迎社区反馈和改进。
+打开 `http://127.0.0.1:8901/`。只看题库可以直接运行服务；需要同步、备注或 AI 核验时，在 `config.json` 的 `app_token` 与 `web/config.local.js` 的 `appToken` 填入相同访问口令。模型密钥只填服务端 `config.json` 或环境变量。
 
-## License
+上述复制命令保留已有配置；已有部署直接使用原配置即可。
 
-MIT — 自由使用、修改、分发。欢迎贡献新题库！
+需要 Python 3.8+，无需安装第三方 Python 库。题库、图片和公式渲染资源已内嵌于页面；同步与 AI 核验需要相应服务可用。PDF 编译另需 TeX Live。
 
-## 贡献指南
+## 目录
 
-欢迎提交 Pull Request 添加新科目题库，或将本框架迁移到其他高校的课程。
+| 路径 | 用途 |
+| --- | --- |
+| `web/` | 首页与各科原生 HTML；`web/exam/` 是题库和页面功能的开发入口 |
+| `server.py` | 同端口提供静态页面、同步、注解和 AI 核验 API |
+| `tools/` | 首页重建、样式版本构建、题库快照、PDF 和离线打包工具 |
+| `bank-data/` | 从 HTML 提取的题库快照，供缺少裸页时使用 |
+| `vendor/` | PDF 使用的第三方 LaTeX 组件和字体 |
+| `android/` | Android 原生 WebView 壳与构建说明 |
+| `deploy/` | Caddy 示例和 systemd 服务文件 |
+| `tests/` | 使用临时目录启动实际后端的集成测试 |
+| `data/`、`book/`、`.local/` | 个人运行数据、生成物和本地档案，均不纳入版本控制 |
 
-提交题库时，请确保：
-- 题库文件放在 `banks/` 目录
-- 包含完整的 `QUIZ_META`、`questionData`、`QUESTION_CHAPS`、`CAT_MAP`、`SONG_LINES`
-- 题目内容准确，答案正确
+修改科目页面后运行 `python3 tools/build_frontend.py`，把更新写入首页内嵌页面。题库以 `web/exam/*.html` 为准；`bank-data-export/` 中的旧修正导出不自动合并。
+
+## 开发与部署
+
+- [项目沿革](docs/history.md)：TJU-Quiz-Hub 与 exam 的延续关系、旧版标签及历史分支。
+- [开发说明](docs/development.md)：原生页面、重建流程与测试。
+- [部署说明](docs/deployment.md)：配置、API、Caddy 和 systemd。
+- [PDF 与离线包](docs/offline-book.md)：章节汇编、TeX 依赖和已知限制。
+- [Android 说明](android/README.md)：原生壳的构建与配置。
+
+运行后端与前端配置检查（前端行为测试需要 Node.js，运行网站本身不需要）：
+
+```bash
+python3 -m unittest discover -s tests -v
+```
+
+GitHub Actions 配置会在推送和 PR 时运行测试、题库检查及离线打包。
+
+## 许可
+
+原创代码采用 [MIT](LICENSE)。题库、试卷内容及第三方组件另见 [第三方与内容说明](THIRD_PARTY_NOTICES.md) 和 `licenses/`；MIT 不替代这些内容自身的授权条件。

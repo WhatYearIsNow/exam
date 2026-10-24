@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>I Love TJU</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%}
+  body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+    background:linear-gradient(160deg,#002a55 0%,#0a4a8f 100%);color:#fff;
+    display:flex;align-items:center;justify-content:center;padding:32px}
+  .box{text-align:center;max-width:360px}
+  .logo{font-size:56px;margin-bottom:18px}
+  h1{font-size:22px;margin-bottom:12px;letter-spacing:1px}
+  p{font-size:14px;line-height:1.8;opacity:.85;margin-bottom:28px}
+  button{appearance:none;border:none;border-radius:24px;background:#ffc800;color:#002a55;
+    font-size:16px;font-weight:700;padding:13px 44px;cursor:pointer;box-shadow:0 6px 18px rgba(0,0,0,.22)}
+  button:active{transform:scale(.97)}
+  .hint{margin-top:18px;font-size:12px;opacity:.6}
+</style></head>
+<body>
+  <div class="box">
+    <div class="logo">📚</div>
+    <h1>I Love TJU</h1>
+    <p>无法连接到刷题服务器，请检查网络后重试。<br>作答数据会在连接恢复后自动同步。</p>
+    <button onclick="retry()">重新连接</button>
+    <div class="hint">__EXAM_HOST_HTML__</div>
+  </div>
+<script>function retry(){location.href=__EXAM_URL_JSON__;}</script>
+</body>
+</html>
