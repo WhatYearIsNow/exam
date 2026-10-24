@@ -46,7 +46,7 @@ python3 server.py
 - [题库数据交接](docs/data-handoff.md)：与 `zhenti-pipeline-v2` 的职责边界、导出方式和修正保留规则。
 - [题库来源与授权](docs/content-rights.md)：代码许可、题目材料和人工修正如何分别处理。
 - [Android 说明](android/README.md)：原生壳的构建与配置。
-- [Android 测试版下载](https://github.com/WhatYearIsNow/exam/releases/tag/android-v2.4-preview.1)：独立安装的手机预览包，可与正式版并存。
+- [Android 测试版下载](https://github.com/WhatYearIsNow/exam/releases/tag/android-v2.4-preview.2)：独立安装的手机预览包，可与正式版并存。
 
 运行后端与前端配置检查（前端行为测试需要 Node.js，运行网站本身不需要）：
 

@@ -20,7 +20,7 @@ public class MainActivity extends Activity {
     private static final String OFFLINE_URL = "file:///android_asset/offline.html";
     private boolean offlineShown = false;
     ValueCallback<Uri[]> fileUploadCallback;
-    private Bridge bridge = new Bridge(this);
+    private Bridge bridge;
     private WebView web;
     private FrameLayout root;
 
@@ -29,11 +29,11 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         CrashGuard.install(this);
         CrashGuard.notifyIfCrashed(this);
+        bridge = new Bridge(this);
         root = new FrameLayout(this);
         root.setBackgroundColor(Color.parseColor("#002a55"));
         buildWebView();
         setContentView(root);
-        bridge = new Bridge(this);
 
         if (savedInstanceState != null) {
             web.restoreState(savedInstanceState);
@@ -79,7 +79,7 @@ public class MainActivity extends Activity {
 
     @Override public boolean dispatchKeyEvent(KeyEvent event) {
         if (event.getAction() == KeyEvent.ACTION_DOWN && event.getRepeatCount() == 0
-                && bridge.isInPractice()) {
+                && bridge != null && bridge.isInPractice()) {
             int kc = event.getKeyCode();
             if (kc == KeyEvent.KEYCODE_VOLUME_UP)   { volumeNav(-1); return true; }
             if (kc == KeyEvent.KEYCODE_VOLUME_DOWN) { volumeNav(1);  return true; }
