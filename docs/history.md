@@ -9,9 +9,10 @@
 | TJU-Quiz-Hub 初始框架，2026-07-13 | `c1d0e5f956ad14308d7f3b6fa2eebc4faf66256f` | 原始主线历史的首个提交 |
 | TJU-Quiz-Hub 原主线最后状态，2026-07-13 | `451d3a5e416adc4859ae3bb488116d4695afe64e` | 标签 [`legacy-tju-quiz-hub`](https://github.com/WhatYearIsNow/exam/tree/legacy-tju-quiz-hub)，分支 `legacy/master` |
 | 原网站开发分支最后状态，2026-08-13 | `82c14894a14028cf8c0222b89436a25c32ac2de5` | 分支 [`legacy/agent/publish-2026-08-13`](https://github.com/WhatYearIsNow/exam/tree/legacy/agent/publish-2026-08-13) |
+| 旧仓库 `master` 的后续提交，2026-07-26 至 2026-10-01 | `c27c9507f6ca143bb5bb19e6fa09f6fcea073bc6` | 经合并提交 [`1f16508`](https://github.com/WhatYearIsNow/exam/commit/1f16508) 并入 `main` |
 | exam 首个延续版本，2026-10-24 | 接续旧主线的新提交 | `main` 分支与 [`exam-initial`](https://github.com/WhatYearIsNow/exam/tree/exam-initial) 标签 |
 
-旧主线的 5 条提交保持原 SHA、作者和时间，并作为 `main` 的祖先。原网站开发分支包含额外 2 条提交，通过 `legacy/` 下的分支保留。历史没有压缩或重新生成，旧版文件、文档与许可可直接从对应引用中取得。
+旧主线的 5 条提交保持原 SHA、作者和时间，并作为 `main` 的祖先。原网站开发分支包含额外 2 条提交，通过 `legacy/` 下的分支保留。2026-10-24 的合并提交 [`1f16508`](https://github.com/WhatYearIsNow/exam/commit/1f16508) 又把旧仓库 `master` 在 `451d3a5` 之后的 6 条提交（`4da6cf1` 至 `c27c950`，含站点构建流程与 2026-10-01 的子站归档快照、去向说明）并入 `main` 的提交图；合并以 exam 的内容为准，不改变任何文件。至此 TJU-Quiz-Hub 的全部原始提交都能从 `main` 追溯，`legacy/` 分支与 `legacy-tju-quiz-hub` 标签继续保留。历史没有压缩或重新生成，旧版文件、文档与许可可直接从对应引用中取得。
 
 ## 从旧版到当前版本
 
