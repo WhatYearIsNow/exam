@@ -56,6 +56,8 @@ def prepare(root):
         subprocess.run([sys.executable, str(root / 'tools/build_frontend.py'),
                         '--web-dir', str(site)], check=True, env=rt.clean_env(),
                        stdout=subprocess.DEVNULL)
+        index = site / 'index.html'
+        index.write_text(index.read_text().replace('<title>', '<title>[开发预览] ', 1))
         rt.atomic_link(base / 'web', site.name)
         # Keep one previous site for in-flight reads; discard only our generated sites.
         previous = sorted((p for p in base.glob('site-*') if p.is_dir() and p != site),
