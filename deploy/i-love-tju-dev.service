@@ -1,0 +1,14 @@
+[Unit]
+Description=exam isolated development preview
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/exam
+ExecStart=/usr/bin/python3 /opt/exam/tools/dev.py serve --port 8902
+Restart=on-failure
+RestartSec=3
+NoNewPrivileges=true
+
+[Install]
+WantedBy=multi-user.target
