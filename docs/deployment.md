@@ -7,8 +7,8 @@
 | 服务端字段 | 环境变量 | 用途 |
 | --- | --- | --- |
 | `app_token` | `ILOVETJU_APP_TOKEN` | 同步、注解和 AI API 访问口令 |
-| `tju_llm_base`、`tju_llm_key`、`tju_llm_model` | `ILOVETJU_TJU_LLM_BASE`、`ILOVETJU_TJU_LLM_KEY`、`ILOVETJU_TJU_LLM_MODEL` | 首轮 AI 核验 |
-| `llm_base`、`llm_key`、`llm_model` | `ILOVETJU_LLM_BASE`、`ILOVETJU_LLM_KEY`、`ILOVETJU_LLM_MODEL` | 后续 AI 复核 |
+| `tju_llm_base`、`tju_llm_key`、`tju_llm_model` | `ILOVETJU_TJU_LLM_BASE`、`ILOVETJU_TJU_LLM_KEY`、`ILOVETJU_TJU_LLM_MODEL` | 首轮 AI 核验（校园网环境） |
+| `llm_base`、`llm_key`、`llm_model` | `ILOVETJU_LLM_BASE`、`ILOVETJU_LLM_KEY`、`ILOVETJU_LLM_MODEL` | 后续 AI 复核；校园模型不可达或未配置时自动跳过一审直接使用 |
 
 环境变量优先于 JSON，包括空字符串；不提供 JSON 文件时也可完全用环境变量配置。未配置模型密钥时，AI 核验会返回配置错误，题库浏览仍可使用。
 

@@ -201,34 +201,35 @@ def ai_check(cfg, payload):
     images = [u for u in (payload.get("images") or [])
               if isinstance(u, str) and u.startswith("data:image/") and len(u) <= 400 * 1024][:3]
 
+    skip_note = None   # 非空 = 一审被跳过（无校园网/未配置），直接落到 DeepSeek
     if not first:
-        # ── 一审：tju-llm（天大校内 LLM 服务）──
+        # ── 一审：tju-llm（天大校内 LLM 服务，需要校园网环境）──
         tkey = cfg.get("tju_llm_key") or ""
         if not tkey:
-            return {"error": "服务端未配置 tju-llm Key（config.json tju_llm_key）"}
-        tbase = cfg.get("tju_llm_base") or "https://ai.tju.edu.cn/api/v3"
-        tmodel = cfg.get("tju_llm_model") or "tju-llm"
-        try:
-            parsed = _chat(tbase, tkey, tmodel,
-                           build_prompt(subject, q, doubt, None, images_count=len(images)),
-                           images=images)
-            if parsed is None:
-                return {"error": "AI 一审输出无法解析"}
-            parsed["reason"] = format_reason(parsed.get("reason"))
-            parsed["stage"] = 1
-            parsed["model"] = "tju-llm"
-            return parsed
-        except urllib.error.HTTPError as e:
-            return {"error": "tju-llm HTTP %s：%s" % (e.code, e.read().decode("utf-8", "replace")[:120])}
-        except Exception as e:
-            return {"error": "tju-llm 调用失败：" + str(e)[:200]}
+            skip_note = "无校园网环境：未配置 tju-llm Key，已跳过一审"
+        else:
+            tbase = cfg.get("tju_llm_base") or "https://ai.tju.edu.cn/api/v3"
+            tmodel = cfg.get("tju_llm_model") or "tju-llm"
+            try:
+                parsed = _chat(tbase, tkey, tmodel,
+                               build_prompt(subject, q, doubt, None, images_count=len(images)),
+                               images=images)
+                if parsed is None:
+                    return {"error": "AI 一审输出无法解析"}
+                parsed["reason"] = format_reason(parsed.get("reason"))
+                parsed["stage"] = 1
+                parsed["model"] = "tju-llm"
+                return parsed
+            except urllib.error.HTTPError as e:
+                skip_note = "无校园网环境：tju-llm HTTP %s，已跳过一审" % e.code
+            except Exception as e:
+                skip_note = "无校园网环境：tju-llm 不可达（%s），已跳过一审" % str(e)[:80]
 
     # ── 二审：DeepSeek，基于上一轮结论 + 用户质疑 复核 ──
-    # 实测 deepseek-v4-flash / reasoner / flash 均支持 image_url 读图；
-    # deepseek-v4-pro 与 deepseek-chat 不支持，故带图题回退链不含 deepseek-chat
+    # （一审被跳过时 first 为 None：DeepSeek 直接作首轮，结论注明跳过原因）
     key = cfg.get("llm_key") or ""
     if not key:
-        return {"error": "服务端未配置 DeepSeek Key（config.json llm_key）"}
+        return {"error": "AI 核验失败（一审已跳过）：服务端未配置 DeepSeek Key（config.json llm_key）"}
     base = (cfg.get("llm_base") or "https://api.deepseek.com").rstrip("/")
     prompt = build_prompt(subject, q, doubt, first, images_count=len(images))
     configured_model = cfg.get("llm_model") or "deepseek-chat"
@@ -247,10 +248,14 @@ def ai_check(cfg, payload):
                 last_err = "AI 二审输出无法解析"
                 continue
             parsed["reason"] = format_reason(parsed.get("reason"))
-            parsed["stage"] = int(first.get("stage") or 1) + 1
+            if skip_note:
+                parsed["reason"] = skip_note + "\n\n" + parsed["reason"]
+                parsed["stage"] = 1
+            else:
+                parsed["stage"] = int(first.get("stage") or 1) + 1
+                parsed["firstResult"] = {k: first.get(k) for k in
+                                         ("correct", "confidence", "correctAnswer", "reason")}
             parsed["model"] = "deepseek"
-            parsed["firstResult"] = {k: first.get(k) for k in
-                                     ("correct", "confidence", "correctAnswer", "reason")}
             return parsed
         except urllib.error.HTTPError as e:
             last_err = "LLM HTTP %s" % e.code

@@ -1461,8 +1461,8 @@ function tjuWirePanel(qid, box) {
 
 function tjuAiHtml(v, qid) {
   var stg = v.stage || 1;
-  var modelTag = stg >= 2
-    ? '🔁 DeepSeek ' + (stg === 2 ? '二审' : '第 ' + stg + ' 轮审核') + '结论'
+  var modelTag = v.model === 'deepseek'
+    ? '🔁 DeepSeek ' + (stg === 2 ? '二审' : stg >= 3 ? '第 ' + stg + ' 轮审核' : '结论（已跳过一审）') + '结论'
     : '🤖 tju-llm 一审结论';
   var headRow = '<div class="tju-ai-toprow"><div class="tju-ai-model">' + modelTag + '</div>'
     + '<button class="tju-ai-clear" title="清除审核记录">🗑</button></div>';
