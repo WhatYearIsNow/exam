@@ -7,15 +7,18 @@
                  GET/PUT ?slot=xxx，Bearer Token，按记录 at 时间戳合并）
 2. /api/annotations  题目存疑标记 / 备注 / AI 结论的持久化（按 at 时间戳合并）
 3. /api/ai-check      AI 答案核验（复用服务器现有 DeepSeek 配置，密钥仅存服务端）
-4. /health       健康检查
+4. /api/manifest  静态页面版本清单（免鉴权，供离线客户端检测题库更新）
+5. /health       健康检查
 
 默认监听 127.0.0.1:8901，同时提供 web/ 静态页面和 API。
 生产环境可由 Caddy 提供静态文件并反代 /sync、/api 前缀。
 """
 import argparse
+import hashlib
 import json
 import os
 import re
+import stat
 import threading
 import time
 import urllib.request
@@ -529,11 +532,40 @@ def parse_llm_json(content):
 
 
 # ─────────────────────────── HTTP ───────────────────────────
+# 版本清单哈希缓存：键含 mtime_ns 和 size，文件变化自然失效
+_manifest_sha = {}
+
+
 class Handler(SimpleHTTPRequestHandler):
     server_version = "ILoveTJU/1.0"
 
     def log_message(self, fmt, *args):
         print("%s %s" % (time.strftime("%H:%M:%S"), fmt % args), flush=True)
+
+    def _manifest_payload(self):
+        """离线客户端更新检测用的静态文件清单（免鉴权，仅含哈希和大小）。"""
+        files = {}
+        for route, name in (("/", "index.html"), ("/config.local.js", "config.local.js")):
+            p = os.path.join(self.directory, name)
+            try:
+                st = os.stat(p)
+            except OSError:
+                continue
+            if not stat.S_ISREG(st.st_mode):
+                continue
+            key = (route, st.st_mtime_ns, st.st_size)
+            with _lock:
+                sha = _manifest_sha.get(key)
+            if sha is None:
+                h = hashlib.sha256()
+                with open(p, "rb") as f:
+                    for chunk in iter(lambda: f.read(1024 * 1024), b""):
+                        h.update(chunk)
+                sha = h.hexdigest()
+                with _lock:
+                    _manifest_sha[key] = sha
+            files[route] = {"sha256": sha, "size": st.st_size}
+        return {"ok": True, "files": files}
 
     def _read_body(self, cap):
         length = int(self.headers.get("Content-Length") or 0)
@@ -565,6 +597,10 @@ class Handler(SimpleHTTPRequestHandler):
 
         if path == "/health":
             self._json(200, {"ok": True, "t": int(time.time())})
+            return
+
+        if path == "/api/manifest":
+            self._json(200, self._manifest_payload())
             return
 
         if path.startswith("/sync"):

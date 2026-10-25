@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.os.Build;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
@@ -24,6 +25,20 @@ class MyClient extends WebViewClient {
             return true;
         }
         return scheme.equals("file");
+    }
+
+    /* 离线优先入口：同源主页/配置命中本地缓存时直接回包 */
+    @Override public WebResourceResponse shouldInterceptRequest(WebView v, WebResourceRequest req) {
+        return act.interceptRequest(req);
+    }
+
+    @Override public void onPageFinished(WebView v, String url) {
+        Uri u = Uri.parse(url);
+        String scheme = u.getScheme() == null ? "" : u.getScheme();
+        if ((scheme.equals("http") || scheme.equals("https"))
+                && MainActivity.HOST.equalsIgnoreCase(u.getHost())) {
+            act.onSitePageLoaded();
+        }
     }
 
     @Override public boolean onRenderProcessGone(WebView v, android.webkit.RenderProcessGoneDetail detail) {

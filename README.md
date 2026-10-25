@@ -1,6 +1,6 @@
 # exam · I Love TJU
 
-天津大学课程刷题工具。前端使用原生 HTML、CSS 和 JavaScript，后端使用 Python 标准库；包含马原、大学物理、概率论题库，以及作答同步、题目备注、修正和 AI 核验功能。
+天津大学课程刷题工具。前端使用原生 HTML、CSS 和 JavaScript，后端使用 Python 标准库；包含马原、大学物理、概率论题库，以及作答同步、题目备注、修正和 AI 核验功能。支持在校园网之外使用：浏览器与 Android 壳会在联网时缓存题库，离线用缓存刷题，回到可达网络后自动更新题库并补推离线期间的作答（见 [Android 离线模式](android/README.md#离线模式) 与 [开发说明](docs/development.md#离线缓存与题库更新)）。
 
 本仓库是 [TJU-Quiz-Hub](https://github.com/WhatYearIsNow/TJU-Quiz-Hub) 的后续开发版本，保留其原始提交历史。旧版源码可通过 [legacy-tju-quiz-hub 标签](https://github.com/WhatYearIsNow/exam/tree/legacy-tju-quiz-hub) 查看；原有分支与版本关系见 [项目沿革](docs/history.md)。
 
@@ -27,7 +27,7 @@ python3 server.py
 | 路径 | 用途 |
 | --- | --- |
 | `web/` | 首页与各科原生 HTML；`web/exam/` 是题库和页面功能的开发入口 |
-| `server.py` | 同端口提供静态页面、同步、注解和 AI 核验 API |
+| `server.py` | 同端口提供静态页面、同步、注解、AI 核验和版本清单 API |
 | `tools/` | 首页重建、样式版本构建和题库导出；另保留迁入的历史 PDF 脚本供交接 |
 | `bank-data/` | 从网页题库提取的 JSON 快照 |
 | `vendor/` | 随历史 PDF 文件迁入的 LaTeX 组件和字体，不是网页运行依赖 |

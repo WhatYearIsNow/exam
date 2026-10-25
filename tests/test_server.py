@@ -3,6 +3,7 @@
 Run with: python3 -m unittest discover -s tests -v
 No test sends an authenticated AI request or uses the deployment's config/data.
 """
+import hashlib
 import http.client
 import json
 import os
@@ -119,6 +120,24 @@ class ServerIntegrationTests(unittest.TestCase):
         status, payload = server.request("GET", "/health")
         self.assertEqual(status, 200)
         self.assertTrue(payload["ok"])
+
+    def test_manifest_lists_static_files_without_auth(self):
+        server = self.start_server()
+        status, payload = server.request("GET", "/api/manifest")
+        self.assertEqual(status, 200)
+        self.assertTrue(payload["ok"])
+        files = payload["files"]
+        self.assertEqual(set(files), {"/"})
+        self.assertEqual(files["/"]["size"], len(server.index))
+        self.assertEqual(files["/"]["sha256"],
+                         hashlib.sha256(server.index).hexdigest())
+        local = b"window.ILOVETJU_CONFIG={appToken:'x'};\n"
+        (server.web / "config.local.js").write_bytes(local)
+        status, payload = server.request("GET", "/api/manifest")
+        self.assertEqual(status, 200)
+        self.assertEqual(set(payload["files"]), {"/", "/config.local.js"})
+        self.assertEqual(payload["files"]["/config.local.js"]["sha256"],
+                         hashlib.sha256(local).hexdigest())
 
     def test_api_rejects_missing_and_incorrect_authentication(self):
         server = self.start_server()

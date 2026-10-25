@@ -1675,7 +1675,7 @@ async function pullCloud(silent){
     localStorage.setItem(LS_KEY,JSON.stringify(records));
     snapNow();
     updateWrongBadge();
-    if(pendingPush)setTimeout(()=>{if(pendingPush)pushCloud(true);},1000);
+    if(pendingPush||Object.keys(dirtyKeys).length){pendingPush=true;setTimeout(()=>{if(pendingPush)pushCloud(true);},1000);}   // 离线积累的脏记录：恢复拉取后自动补推
     if(changed){if(view==='list')renderList();else renderPractice();}
     if(!silent)toast(changed?'已拉取，更新 '+changed+' 条':'云端无更新');
   }catch(e){if(!silent)toast('拉取失败：'+e.message);}

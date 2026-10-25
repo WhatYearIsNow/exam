@@ -19,6 +19,12 @@ python3 server.py
 
 直接访问 `/exam/` 可调试科目裸页，访问 `/` 检查首页中的实际效果。首页自身的顶栏和增强功能直接在 `web/index.html` 中维护，重建脚本只更新其中的 `payload-*` 内容。
 
+## 离线缓存与题库更新
+
+浏览器端离线能力由三个手工维护的部分组成：`web/sw.js`（Service Worker，cache-first 提供 `/` 与 `/config.local.js` 的离线回放）、`web/index.html` 末尾的注册与更新检查脚本（拉取 `/api/manifest` 比对哈希后写入 SW 缓存）。它们都不参与 `tools/build_frontend.py` 的构建，修改后无需重建 payload。服务端清单接口见 [部署说明](deployment.md)；Android 壳的同款机制（本地缓存 + 拦截回放 + 自动更新）见 `android/README.md` 的"离线模式"。
+
+三科页面的作答同步有持久化脏队列：离线期间的记录保存在 localStorage，恢复拉取成功后自动补推；注解脏标记同样持久化。改动同步逻辑需同步修改三个科目页面（复制粘贴的代码块）。
+
 可选样式版本由 `python3 tools/build_premium.py` 生成到 `web/premium/`。这是生成目录，修改应落在科目源页面或构建脚本中。
 
 两个构建脚本都支持 `--web-dir`、`--exam-dir`，也可设置 `ILOVETJU_WEB_DIR`、`ILOVETJU_EXAM_DIR`；默认路径分别为项目内 `web/` 和 `web/exam/`。`--help` 可查看参数。

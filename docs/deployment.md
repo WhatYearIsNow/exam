@@ -33,11 +33,12 @@ python3 server.py --host 127.0.0.1 --port 8901
 | 路径 | 方法 | 说明 |
 | --- | --- | --- |
 | `/health` | GET | 无需鉴权的健康检查 |
+| `/api/manifest` | GET | 无需鉴权的静态页面版本清单（`/` 与 `/config.local.js` 的 sha256），供离线客户端检测题库更新 |
 | `/sync?slot=default` | GET、PUT | 作答记录，按记录的 `at` 合并 |
 | `/api/annotations?subject=probability` | GET、PUT | `flags`、`notes`、`ai`、`corr` 四类个人注解 |
 | `/api/ai-check` | POST | AI 核验 |
 
-除健康检查外，上表 API 需要 `Authorization: Bearer <口令>`，也兼容 `X-Auth-Token`。数据写入 `ILOVETJU_DATA_DIR`；更新代码时应保留配置和该目录。
+除健康检查和版本清单外，上表 API 需要 `Authorization: Bearer <口令>`，也兼容 `X-Auth-Token`。数据写入 `ILOVETJU_DATA_DIR`；更新代码时应保留配置和该目录。
 
 ## Caddy 与 systemd
 
