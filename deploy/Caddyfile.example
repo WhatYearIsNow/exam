@@ -7,8 +7,14 @@ example.com {
         reverse_proxy 127.0.0.1:8901
     }
 
+    @downloads path /*.apk /*.idsig /dl /dl/*
+    handle @downloads {
+        root * /opt/exam/.local/public
+        file_server
+    }
+
     handle {
-        root * /opt/toy/i-love-tju/web
+        root * /opt/exam/.local/current/web
         file_server
     }
 

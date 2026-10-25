@@ -8,6 +8,8 @@
 
 ## 本地运行
 
+KVM19 上的开发与部署目录统一为 `/opt/exam`，后端由 `i-love-tju-api.service` 托管，正式版本位于 `.local/current`。编辑器直接打开项目根目录，使用 `python3 tools/dev.py serve` 在独立端口 8902 预览；测试配置和数据与正式服务分开。协作流程见 [贡献说明](CONTRIBUTING.md)，发布、回滚与现有配置位置见 [部署说明](docs/deployment.md)。
+
 在项目根目录执行：
 
 ```bash
