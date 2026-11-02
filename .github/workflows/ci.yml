@@ -30,5 +30,9 @@ jobs:
         run: |
           python3 android/build.py --help
           python3 android/sign.py --help
+      - name: Check isolated development and release helpers
+        run: |
+          python3 tools/dev.py --help
+          python3 tools/release.py --help
       - name: Validate and export webpage question banks
         run: python3 tools/extract_bank.py --out "$RUNNER_TEMP/exam-bank-data"

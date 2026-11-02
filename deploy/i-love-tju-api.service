@@ -4,8 +4,11 @@ After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory=/opt/toy/i-love-tju
-ExecStart=/usr/bin/python3 /opt/toy/i-love-tju/server.py
+WorkingDirectory=/opt/exam/.local/current
+Environment=ILOVETJU_CONFIG=/opt/exam/config.json
+Environment=ILOVETJU_DATA_DIR=/opt/exam/data
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/usr/bin/python3 /opt/exam/.local/current/server.py --host 127.0.0.1 --port 8901 --web-dir /opt/exam/.local/current/web
 Restart=on-failure
 RestartSec=3
 NoNewPrivileges=true
