@@ -12,10 +12,18 @@
 
 ```bash
 python3 tools/build_frontend.py
-python3 server.py
+python3 tools/dev.py serve
 ```
 
 重建脚本同时从各科题库 JSON 计算首页的题量标签，避免页面文案与实际题数不一致。
+
+开发预览监听 `127.0.0.1:8902`。`tools/dev.py` 将工作区页面复制到 `.local/dev/site-*`，在那里重建 payload，再通过 `.local/dev/web` 提供页面，不改动正式页面。启动时清除继承的 `ILOVETJU_*` 环境变量，使用 `.local/dev/config.json`、`.local/dev/data/` 和单独生成的应用访问令牌；默认模型密钥为空。脚本拒绝复用当前正式配置中的口令或模型密钥。刷新预览副本时保留已有测试记录；源码修改后重新启动 `serve`，或在服务运行期间执行 `python3 tools/dev.py prepare`。
+
+可在 Windows 编辑器中通过 SSH 打开 `/opt/exam`，把服务器的 8902 端口转发到本机；用独立浏览器配置或该端口查看预览。端口属于浏览器 origin 的一部分，开发站点的本地作答与正式域名独立。默认开发服务器只监听回环地址。
+
+服务器也提供可手动启动的 `i-love-tju-dev.service`；它与正式服务分开，未启用开机启动。使用 `systemctl restart i-love-tju-dev.service` 重建并启动预览，用 `systemctl stop i-love-tju-dev.service` 停止。不要同时在终端和服务中占用 8902。
+
+正式站点读取 `.local/current/web`，编辑工作区不直接上线。发布版本固定到 Git 提交并保存文件哈希；正式数据、服务端配置和下载文件单独持久化，详见 [部署说明](deployment.md#发布与回滚)。
 
 直接访问 `/exam/` 可调试科目裸页，访问 `/` 检查首页中的实际效果。首页自身的顶栏和增强功能直接在 `web/index.html` 中维护，重建脚本只更新其中的 `payload-*` 内容。
 

@@ -6,7 +6,7 @@
 /data/*
 !/data/.gitkeep
 /web/config.local.js
-/web/dl/
+/web/dl
 
 # Local archives, migration records, and generated distributions
 /.local/
