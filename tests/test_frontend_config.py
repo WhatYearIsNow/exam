@@ -60,7 +60,7 @@ const context = {
 const end = input.enhancer.lastIndexOf('})();');
 assert.ok(end > 0);
 const enhancer = input.enhancer.slice(0, end) + `
-globalThis.enhancer = {tjuToken, pushAnnot, pullAnnot, annotChanged, tjuAiSend, annot};
+globalThis.enhancer = {tjuToken, pushAnnot, pullAnnot, annotChanged, tjuAiSend, rerender, annot};
 ` + input.enhancer.slice(end);
 vm.createContext(context);
 vm.runInContext(enhancer, context);
@@ -79,6 +79,18 @@ class ConfigMarkupTests(unittest.TestCase):
         self.assertNotRegex(html, r"\bvar TOKEN\s*=")
         example = (ROOT / "web/config.example.js").read_text(encoding="utf-8")
         self.assertRegex(example, r"appToken:\s*''")
+
+    def test_probability_distribution_table_is_preserved(self):
+        html = (ROOT / "web/exam/probability.html").read_text(encoding="utf-8")
+        payload = re.search(
+            r'<script id="probability-data" type="application/json">(.*?)</script>',
+            html,
+            re.S,
+        ).group(1)
+        questions = json.loads(payload)["questions"]
+        question = next(item for item in questions if item["id"] == "模拟卷5-T13")
+        self.assertIn(r"\begin{array}{c|ccc}", question["desc"])
+        self.assertIn(r"P_X&0.2&0.3&0.5", question["desc"])
 
 
 @unittest.skipUnless(NODE, "Node.js is needed for iframe JavaScript behavior checks")
@@ -152,6 +164,21 @@ const put = requests.find(request => request.method === 'PUT');
 assert.ok(put);
 assert.equal(put.headers.authorization, 'Bearer new-test-token');
 assert.equal(JSON.parse(put.body).notes.q1.v, 'queued note');
+""")
+
+    def test_annotation_rerender_invalidates_only_current_question_card(self):
+        self.run_scenario(r"""
+view = 'practice';
+pracList = ['q1'];
+pracIdx = 0;
+globalThis.renderPractice = function () {};
+renderPractice._cards = new Map([
+  ['q1|paper|0', {id: 'current'}],
+  ['q2|paper|0', {id: 'other'}]
+]);
+enhancer.rerender();
+assert.equal(renderPractice._cards.has('q1|paper|0'), false);
+assert.equal(renderPractice._cards.has('q2|paper|0'), true);
 """)
 
 
