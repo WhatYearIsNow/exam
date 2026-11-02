@@ -10,10 +10,10 @@
     },
     "preview": {
       "packageName": "com.tju.quizhub.preview",
-      "versionCode": 25003,
-      "versionName": "2.5-preview.3",
-      "apkUrl": "/Exam-2.5-preview.3.apk",
-      "releaseNotes": "测试版更新"
+      "versionCode": 25004,
+      "versionName": "2.5-preview.4",
+      "apkUrl": "/Exam-2.5-preview.4.apk",
+      "releaseNotes": "新增应用内 APK 更新提醒；后续版本可直接在应用中发现并下载。"
     }
   }
 }
