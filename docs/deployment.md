@@ -34,6 +34,7 @@ python3 server.py --host 127.0.0.1 --port 8901
 | --- | --- | --- |
 | `/health` | GET | 无需鉴权的健康检查 |
 | `/api/manifest` | GET | 无需鉴权的静态页面版本清单（`/` 与 `/config.local.js` 的 sha256），供离线客户端检测题库更新 |
+| `/app-update.json` | GET | APK 更新渠道、版本号与同源下载地址；发布安装包后再更新此清单 |
 | `/sync?slot=default` | GET、PUT | 作答记录，按记录的 `at` 合并 |
 | `/api/annotations?subject=probability` | GET、PUT | `flags`、`notes`、`ai`、`corr` 四类个人注解 |
 | `/api/ai-check` | POST | AI 核验 |

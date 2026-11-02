@@ -7,6 +7,7 @@
 - `java/com/tju/quizhub/`：Activity、WebView 回调和 JavaScript 导出接口。
 - `java/com/tju/quizhub/CacheStore.java`：站点离线缓存（应用私有 `files/site-cache/`，存壳页面与 `/config.local.js`）。
 - `java/com/tju/quizhub/SiteUpdater.java`：比对 `/api/manifest` 哈希并增量下载更新缓存。
+- `java/com/tju/quizhub/AppUpdater.java`：启动和网络恢复时检查 APK 版本，并在应用内提示更新。
 - `res/`：图标与主题。
 - `assets/offline.html`：离线页模板；构建时替换站点地址。仅在本地从未成功缓存过站点内容时出现。
 - `AndroidManifest.xml`：包名 `com.tju.quizhub`，版本 `2.5`（versionCode 25），最低 Android 7.0 / API 24。
@@ -71,6 +72,12 @@ python3 android/build.py --sdk /path/to/android-sdk \
 - **自动更新**：启动时和网络恢复（`ConnectivityManager` 回调）都会比对 `/api/manifest`；哈希变化才重新下载，下载完成后校验哈希再原子替换，并 toast「题库已更新，重启应用后生效」。更新在下次启动生效。
 - **离线作答**：站点不可达时页面照常可用；作答与注解由网页层排队保存在 localStorage，服务器恢复可达后自动补推（按时间戳合并）。
 - **兜底**：仅当本地从未成功缓存过站点内容且联网失败时，才显示 `offline.html` 重试页；网络恢复且缓存就绪后会自动回到站点。
+
+## APK 更新通知
+
+App 启动和网络恢复时会静默读取站点根目录的 `app-update.json`。清单中对应渠道的 `versionCode` 大于当前安装版本时，应用内会弹出“发现新版本”，点击“立即更新”后交给系统下载并覆盖安装；同签名、同包名升级会保留应用数据。Android 不允许普通应用绕过用户确认静默安装，因此最后一步仍需按系统提示确认。
+
+正式版和测试版使用独立渠道及包名。发布新 APK 时应先把安装包放到清单声明的同源 URL，确认可下载后再更新 `web/app-update.json`；不要先提高版本号，否则客户端会收到指向不存在文件的通知。题库和网页内容仍由原有 `/api/manifest` 自动更新，不需要提高 APK 版本。
 
 ## 发布与设备验收
 
