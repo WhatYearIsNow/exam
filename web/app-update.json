@@ -1,0 +1,19 @@
+{
+  "schema": 1,
+  "channels": {
+    "stable": {
+      "packageName": "com.tju.quizhub",
+      "versionCode": 23,
+      "versionName": "2.3",
+      "apkUrl": "/ILoveTJU-2.3.apk",
+      "releaseNotes": "正式版更新"
+    },
+    "preview": {
+      "packageName": "com.tju.quizhub.preview",
+      "versionCode": 25004,
+      "versionName": "2.5-preview.4",
+      "apkUrl": "/Exam-2.5-preview.4.apk",
+      "releaseNotes": "新增应用内 APK 更新提醒；后续版本可直接在应用中发现并下载。"
+    }
+  }
+}

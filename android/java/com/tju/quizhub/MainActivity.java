@@ -33,6 +33,7 @@ public class MainActivity extends Activity {
     private WebView web;
     private FrameLayout root;
     private SiteUpdater updater;
+    private AppUpdater appUpdater;
     private ConnectivityManager.NetworkCallback netCallback;
 
     private static String pathOf(String url) {
@@ -47,6 +48,7 @@ public class MainActivity extends Activity {
         CrashGuard.notifyIfCrashed(this);
         bridge = new Bridge(this);
         updater = new SiteUpdater(this);
+        appUpdater = new AppUpdater(this);
         root = new FrameLayout(this);
         root.setBackgroundColor(Color.parseColor("#002a55"));
         buildWebView();
@@ -59,6 +61,7 @@ public class MainActivity extends Activity {
             web.loadUrl(MAIN_URL);
         }
         updater.revalidate();   // 启动即后台比对清单，有新版自动下载，重启后生效
+        appUpdater.check();     // APK 壳有新版时在应用内提示，安装仍由系统确认
     }
 
     private void buildWebView() {
@@ -153,6 +156,7 @@ public class MainActivity extends Activity {
 
     void onNetworkAvailable() {
         if (updater == null) return;
+        if (appUpdater != null) appUpdater.check();
         if (!offlineShown) {
             updater.revalidate();
             return;
@@ -177,7 +181,21 @@ public class MainActivity extends Activity {
         } catch (Exception ignored) {}
     }
 
+    @Override protected void onResume() {
+        super.onResume();
+        if (appUpdater != null) appUpdater.onForeground();
+    }
+
+    @Override protected void onPause() {
+        if (appUpdater != null) appUpdater.onBackground();
+        super.onPause();
+    }
+
     @Override protected void onDestroy() {
+        if (appUpdater != null) {
+            appUpdater.close();
+            appUpdater = null;
+        }
         if (netCallback != null) {
             try {
                 ConnectivityManager cm = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
