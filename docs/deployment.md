@@ -89,6 +89,11 @@ python3 server.py --host 127.0.0.1 --port 8901
 | `/api/annotations?subject=probability` | GET、PUT | `flags`、`notes`、`ai`、`corr` 四类个人注解 |
 | `/api/ai-check` | POST | AI 核验 |
 
+作答同步的用户槽位会在浏览器端自动追加科目标识：默认槽实际分别写入
+`default--marx`、`default--physics` 和 `default--probability`。这是数据隔离边界，
+不能把三科重新指向同一个物理槽文件。旧版使用的 `default` 混合槽仅保留作备份；
+客户端首次升级时会过滤非本科题号并把当前本地状态迁入对应分科槽，不再读取旧槽。
+
 除健康检查和版本清单外，上表 API 需要 `Authorization: Bearer <口令>`，也兼容 `X-Auth-Token`。数据写入 `ILOVETJU_DATA_DIR`；更新代码时应保留配置和该目录。
 
 ## Caddy 与 systemd
