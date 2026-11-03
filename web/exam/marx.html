@@ -91,8 +91,8 @@ body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;backgr
 .qrow .t1{font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .qrow .t2{font-size:12px;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px}
 
-/* 错题重做：上次错选提示条 */
-.prev-ans{margin-top:12px;padding:9px 13px;border:1px dashed #e3b94d;background:#fffaeb;border-radius:9px;color:#8a6a12;font-size:13px;line-height:1.5}
+/* 错题重做：上次作答诊断提示条 */
+.prev-ans{margin:-4px 20px 12px;padding:9px 13px;border:1px dashed #e3b94d;background:#fffaeb;border-radius:9px;color:#8a6a12;font-size:13px;line-height:1.5}
 
 /* 错题回顾工具栏：分类切换 + 右上角重置 */
 .wtoolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
@@ -1410,6 +1410,22 @@ function normalizedOptions(q){
   return options;
 }
 
+function choiceLetters(value){
+  const letters=String(value||'').toUpperCase().match(/[A-E]/g)||[];
+  return [...new Set(letters)].sort().join('');
+}
+function previousAnswerFeedback(q,selected){
+  if(selected===undefined||selected===null||selected==='')return '';
+  if(q.type!=='choice'&&q.type!=='multi')return '上次作答：'+String(selected);
+  const picked=choiceLetters(selected),answer=choiceLetters(q.answer);
+  const extra=[...picked].filter(letter=>!answer.includes(letter)).join('');
+  const missed=[...answer].filter(letter=>!picked.includes(letter)).join('');
+  const parts=['上次作答：'+picked];
+  if(extra)parts.push('错选：'+extra);
+  if(missed)parts.push('漏选：'+missed);
+  return parts.join(' · ');
+}
+
 function toggleAna(hd){
   hd.parentElement.classList.toggle('open');
 }
@@ -2094,7 +2110,7 @@ function renderPractice(){
   const peeked=redoing&&!answered&&redoPeeked.has(qid);
 
   if(q.type==='multi'){
-    const ansLetters=String(q.answer||'');
+    const ansLetters=choiceLetters(q.answer);
     const sel=multiSel[qid]||'';
     html+='<div class="opts">'+normalizedOptions(q).map(o=>{
       let cls='opt';
@@ -2114,7 +2130,7 @@ function renderPractice(){
       ?'<button class="btn" onclick="redoReset(\''+qid+'\')">🔄 重做本题</button>'
       :'<button class="btn show" onclick="redoPeek(\''+qid+'\')">📖 查看答案</button>')+'</div>';
   }else if(q.type==='choice'){
-    const ansLetters=String(q.answer||'');
+    const ansLetters=choiceLetters(q.answer);
     html+='<div class="opts">'+normalizedOptions(q).map(o=>{
       let cls='opt';
       if(answered){
@@ -2153,9 +2169,10 @@ function renderPractice(){
     }
   }
 
-  // 上次错选提示（重做作答后显示 prevMy；仅看答案时显示原错选 r.my）
+  // 上次作答诊断（重做作答后显示 prevMy；仅看答案时显示原作答 r.my）
   const prevSel=answered?r.prevMy:r.my;
-  if(redoing&&(answered||peeked)&&prevSel)html+='<div class="prev-ans">上次错选：'+escHtml(String(prevSel))+'</div>';
+  const prevFeedback=previousAnswerFeedback(q,prevSel);
+  if(redoing&&(answered||peeked)&&prevFeedback)html+='<div class="prev-ans">'+escHtml(prevFeedback)+'</div>';
 
   // 答案 + 解析区（作答后或展开后显示）
   const vok=redoing?r.ok:rv.ok;
@@ -2221,7 +2238,7 @@ function pickOpt(qid,letter){
   const q=qs(qid);const r=rec(qid);
   const redo=redoActive(qid);
   if(redo?(redoDone.has(qid)||redoPeeked.has(qid)):((recIn(qid)||{}).my!==undefined))return; // 已作答或已看答案，锁定（仅限本训练）
-  const correct=String(q.answer||'').trim()===letter;
+  const correct=choiceLetters(q.answer)===letter;
   if(redo){
     redoDone.add(qid);
     records[qid]={my:letter,ok:correct,wrong:!correct,n:(r.n||0)+1,at:Date.now(),prevMy:r.my,prevOk:r.ok,via:mode};
@@ -2250,7 +2267,7 @@ function submitMulti(qid){
   if(redo?(redoDone.has(qid)||redoPeeked.has(qid)):((recIn(qid)||{}).my!==undefined))return;
   const sel=[...(multiSel[qid]||'')].sort().join('');
   if(!sel){toast('请先选择选项');return;}
-  const ans=[...String(q.answer||'')].sort().join('');
+  const ans=choiceLetters(q.answer);
   const correct=ans===sel;
   if(redo){
     redoDone.add(qid);
