@@ -1303,6 +1303,36 @@ function renderTex(text){
   return text;
 }
 
+// 早期 OCR 会把两行分布律表格压平成“X/P | x1 x2 | p1 p2”文本。
+// 仅识别明确的 X/P 表头，避免把条件概率和绝对值中的竖线误当成表格。
+function distributionTableTex(probabilityLabel,values,probabilities){
+  const xs=String(values||'').trim().split(/\s+/).filter(Boolean);
+  const ps=String(probabilities||'').trim().split(/\s+/).filter(Boolean);
+  if(xs.length<2||xs.length!==ps.length)return'';
+  const pLabel=/X/.test(probabilityLabel)?'P_X':'P';
+  return '$$\\begin{array}{c|'+('c'.repeat(xs.length))+'}X&'+xs.join('&')+'\\\\'+'\\hline '+pLabel+'&'+ps.join('&')+'\\end{array}$$';
+}
+
+function normalizeDistributionTables(text){
+  let out=String(text||'');
+  const marker='\\$\\\\frac\\{X\\}\\{(P(?:_\\{?X\\}?)?)\\}\\$';
+  const punctuation='\\s*[,，。;；]';
+  const twoRows=new RegExp(marker+'\\s*\\|\\s*([^|,，。;；\\n]+?)\\s*\\|\\s*([^,，。;；\\n]+?)'+punctuation,'g');
+  out=out.replace(twoRows,(match,label,values,probabilities)=>{
+    const table=distributionTableTex(label,values,probabilities);
+    return table?'\n\n'+table+'\n\n':match;
+  });
+  const oneRow=new RegExp(marker+'\\s*\\|\\s*([^|,，。;；\\n]+?)'+punctuation,'g');
+  out=out.replace(oneRow,(match,label,cells)=>{
+    const tokens=cells.trim().split(/\s+/).filter(Boolean);
+    if(tokens.length<4||tokens.length%2!==0)return match;
+    const middle=tokens.length/2;
+    const table=distributionTableTex(label,tokens.slice(0,middle).join(' '),tokens.slice(middle).join(' '));
+    return table?'\n\n'+table+'\n\n':match;
+  });
+  return out;
+}
+
 // OCR 早期题目中有少量整行 LaTeX 未带 $ 定界符，识别后按块级公式渲染
 function normalizeBareMathLine(line){
   if(!line||line.includes('$'))return line;
@@ -1329,7 +1359,7 @@ function normalizeBareMathLine(line){
 
 function renderMd(text){
   if(!text)return'';
-  const lines=String(text).split('\n');
+  const lines=normalizeDistributionTables(text).split('\n');
   let html='',buf=[];
   const missingImage=line=>{
     const match=line.match(/^!\[\[([^\]|]+)(?:\|([^\]]+))?\]\]\s*$/);
