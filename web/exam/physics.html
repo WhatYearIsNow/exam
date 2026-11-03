@@ -1637,8 +1637,31 @@ function toggleMenu(e){
 
 // ═══════════════ 云端同步（Cloudflare Worker + KV）═══════════════
 const LS_SYNC='physics-quiz-sync-v1';
+const LS_SYNC_SCOPE=LS_KEY+':subject-sync-v2';
 let syncCfg=null;
 function loadSyncCfg(){try{syncCfg=JSON.parse(localStorage.getItem(LS_SYNC)||'null');}catch(e){syncCfg=null;}}
+function syncSubjectSlot(){
+  const base=(syncCfg&&syncCfg.slot)||'default';
+  return base+'--physics';
+}
+// 旧版三科共用一个云端槽，题号重名会串科。首次切换到分科槽时仅保留
+// 当前题库存在的键，并把本地状态完整标记为待推送；旧共享槽不再读取。
+function prepareSubjectSync(){
+  if(!DATA||!syncCfg)return false;
+  const valid=new Set(DATA.questions.map(q=>q.id));
+  let filtered=false;
+  for(const qid of Object.keys(records)){if(!valid.has(qid)){delete records[qid];filtered=true;}}
+  const scope=(syncCfg.url||'').replace(/\/+$/,'')+'|'+syncSubjectSlot();
+  let previous='';
+  try{previous=localStorage.getItem(LS_SYNC_SCOPE)||'';}catch(e){}
+  if(filtered)try{localStorage.setItem(LS_KEY,JSON.stringify(records));}catch(e){}
+  if(previous===scope)return filtered;
+  dirtyKeys={};
+  for(const qid of Object.keys(records))dirtyKeys[qid]=1;
+  saveDirty();pendingPush=Object.keys(dirtyKeys).length>0;
+  try{localStorage.removeItem(LS_SNAP);localStorage.setItem(LS_SYNC_SCOPE,scope);}catch(e){}
+  return true;
+}
 function syncConfig(){
   const cur=syncCfg||{};
   const url=prompt('同步服务器地址（Worker URL）',cur.url||'');
@@ -1651,15 +1674,17 @@ function syncConfig(){
   syncCfg={url:url.replace(/\/+$/,''),token,slot:slot||'default'};
   localStorage.setItem(LS_SYNC,JSON.stringify(syncCfg));
   toast('同步已配置，正在拉取…');
+  prepareSubjectSync();
   pullCloud(true);
 }
 function syncHeaders(){return{'authorization':'Bearer '+syncCfg.token,'content-type':'application/json'};}
-function syncUrl(){return syncCfg.url+'/?slot='+encodeURIComponent(syncCfg.slot);}
+function syncUrl(){return (syncCfg.url||'').replace(/\/+$/,'')+'/?slot='+encodeURIComponent(syncSubjectSlot());}
 // 合并：同题以时间戳较新为准，返回本地更新条数
 function mergeRemote(remote){
   let changed=0;
+  const valid=new Set(DATA.questions.map(q=>q.id));
   for(const[k,v]of Object.entries(remote||{})){
-    if(!v||typeof v!=='object')continue;
+    if(!valid.has(k)||!v||typeof v!=='object')continue;
     const l=records[k];
     if(!l||((v.at||0)>(l.at||0))){records[k]=v;changed++;}
   }
@@ -8811,10 +8836,12 @@ function init(){
     :fetch('physics-data.json').then(r=>{if(!r.ok)throw new Error(r.status);return r.json();}).catch(()=>embedded);
   dataReady.then(async d=>{
     DATA=d;
+    const syncIsolated=prepareSubjectSync();
     $('app-sub').textContent=d.questions.length+' 题 · '+new Set(d.questions.map(q=>q.paper)).size+' 套卷 · 本地保存'+(syncCfg?' · ☁':'');
     if(syncCfg)await pullCloud(true);   // 已配置同步：启动时静默拉取合并
     updateWrongBadge();
     restoreUI();
+    if(syncIsolated&&Object.keys(records).length)toast('三科同步已隔离；旧串科进度请再清除一次');
   }).catch(e=>{
     $('main').innerHTML='<div class="empty"><div class="big">⚠</div>题库加载失败（'+e.message+'）</div>';
   });
