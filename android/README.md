@@ -48,7 +48,7 @@ python3 android/sign.py android/build/local/ILoveTJU-2.4-local-unsigned.apk \
 
 ## 独立安装的测试版
 
-当前测试包见 [Android 2.4 预览版 2](https://github.com/WhatYearIsNow/exam/releases/tag/android-v2.4-preview.2)。真机验收由测试者在设备上进行。
+当前测试包见 [Android 2.5 预览版 5](https://github.com/WhatYearIsNow/exam/releases/tag/android-v2.5-preview.5)。真机验收由测试者在设备上进行。
 
 正式签名库尚未解锁时，可以用独立预览身份提供手机测试，不替换正式版的签名或包名：
 

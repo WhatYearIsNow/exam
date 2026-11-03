@@ -10,10 +10,10 @@
     },
     "preview": {
       "packageName": "com.tju.quizhub.preview",
-      "versionCode": 25004,
-      "versionName": "2.5-preview.4",
-      "apkUrl": "/Exam-2.5-preview.4.apk",
-      "releaseNotes": "新增应用内 APK 更新提醒；后续版本可直接在应用中发现并下载。"
+      "versionCode": 25005,
+      "versionName": "2.5-preview.5",
+      "apkUrl": "/Exam-2.5-preview.5.apk",
+      "releaseNotes": "修复三科作答进度串科及清除后恢复；升级后请将已串科记录再清除一次。"
     }
   }
 }
