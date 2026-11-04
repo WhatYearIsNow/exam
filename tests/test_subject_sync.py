@@ -85,12 +85,12 @@ assert.equal(records.foreign, undefined);
         self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_all_subjects_use_distinct_slots_and_filter_foreign_records(self):
-        for subject in ("marx", "physics", "probability"):
+        for subject in ("marx", "physics", "probability", "shezhi", "gongtu", "yingyu"):
             with self.subTest(subject=subject):
                 self.run_subject(subject)
 
     def test_migration_runs_before_initial_cloud_pull(self):
-        for subject in ("marx", "physics", "probability"):
+        for subject in ("marx", "physics", "probability", "shezhi", "gongtu", "yingyu"):
             html = (ROOT / "web/exam" / f"{subject}.html").read_text(encoding="utf-8")
             data_ready = html.index("dataReady.then(async d=>")
             prepare = html.index("prepareSubjectSync();", data_ready)

@@ -16,7 +16,7 @@ import sys
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 EXAM_DIR = os.environ.get("ILOVETJU_EXAM_DIR", os.path.join(PROJECT_ROOT, "web", "exam"))
 OUT = os.path.join(PROJECT_ROOT, "bank-data")
-SUBJECTS = ("marx", "physics", "probability")
+SUBJECTS = ("marx", "physics", "probability", "shezhi", "gongtu", "yingyu")
 
 
 def main():
