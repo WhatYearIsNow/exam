@@ -10,7 +10,7 @@ import zipfile
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 PACKAGE_NAME = "exam-compilation"
-SUBJECTS = ("marx", "physics", "probability")
+SUBJECTS = ("marx", "physics", "probability", "shezhi", "gongtu", "yingyu")
 
 
 def package_files(root):

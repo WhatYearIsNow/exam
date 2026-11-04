@@ -15,7 +15,8 @@ import re
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-SUBJECTS = {'marx': '马原', 'physics': '大物', 'probability': '概率论'}
+SUBJECTS = {'marx': '马原', 'physics': '大物', 'probability': '概率论',
+            'shezhi': '设制', 'gongtu': '工图', 'yingyu': '英语'}
 
 TAB_HTML = '''<!doctype html>
 <html lang="zh-CN">
@@ -41,6 +42,9 @@ body{font-family:"Microsoft YaHei","PingFang SC","Segoe UI",sans-serif;backgroun
   <button class="tab active" data-page="marx">马原</button>
   <button class="tab" data-page="physics">大物</button>
   <button class="tab" data-page="probability">概率论</button>
+  <button class="tab" data-page="shezhi">设制</button>
+  <button class="tab" data-page="gongtu">工图</button>
+  <button class="tab" data-page="yingyu">英语</button>
 </div>
 <iframe id="frame" src="marx.html"></iframe>
 <script>

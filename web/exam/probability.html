@@ -1111,7 +1111,7 @@ body.practice-active .main { padding-top:8px; }
     <button class="top-btn" onclick="toggleMenu(event)" aria-label="更多">⋯</button>
     <div class="menu-pop hidden" id="menu-pop">
       <div class="menu-label">切换科目</div>
-      <div class="menu-subjects"><button class="menu-subject" onclick="requestSubject('marx')">马原</button><button class="menu-subject current" aria-current="page" onclick="requestSubject('probability')">概率论</button><button class="menu-subject" onclick="requestSubject('physics')">大物</button></div>
+      <div class="menu-subjects"><button class="menu-subject" onclick="requestSubject('marx')">马原</button><button class="menu-subject" onclick="requestSubject('physics')">大物</button><button class="menu-subject current" aria-current="page" onclick="requestSubject('probability')">概率论</button><button class="menu-subject" onclick="requestSubject('shezhi')">设制</button><button class="menu-subject" onclick="requestSubject('gongtu')">工图</button><button class="menu-subject" onclick="requestSubject('yingyu')">英语</button></div>
       <div class="menu-divider"></div>
       <!-- 云端同步（暂停用，代码保留）
       <button onclick="syncConfig()">☁️ 云端同步设置</button>
@@ -1575,7 +1575,7 @@ function importData(input){
 
 // ─── 导出错题给 AI（Markdown，含完整题面）───
 function subjName(){
-  return ({marx:'马原',physics:'大物',probability:'概率论'})[(LS_KEY||'').replace('-quiz-records-v1','')]||'刷题';
+  return ({marx:'马原',physics:'大物',probability:'概率论',shezhi:'设制',gongtu:'工图',yingyu:'英语'})[(LS_KEY||'').replace('-quiz-records-v1','')]||'刷题';
 }
 function buildWrongMd(){
   const wqs=DATA.questions.filter(q=>isWrong(q.id));

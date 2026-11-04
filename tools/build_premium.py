@@ -12,7 +12,7 @@ import re
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
-SUBJECTS = ['marx', 'physics', 'probability']
+SUBJECTS = ['marx', 'physics', 'probability', 'shezhi', 'gongtu', 'yingyu']
 
 PREMIUM = '''<style id="ui-premium-v1">
 /* ═══ 质感层 v1：只动观感，不动布局与功能 ═══ */

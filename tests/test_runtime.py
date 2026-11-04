@@ -43,7 +43,7 @@ class RuntimeTests(unittest.TestCase):
             shutil.copy2(ROOT / name, self.root / name)
         (self.root / 'server.py').write_text("VERSION = 'committed'\n")
         shell = []
-        for subject in ('marx', 'physics', 'probability'):
+        for subject in ('marx', 'physics', 'probability', 'shezhi', 'gongtu', 'yingyu'):
             (self.root / 'web/exam' / (subject + '.html')).write_text(
                 '<script id="' + subject + '-data" type="application/json">'
                 + json.dumps({'questions': [{'id': 'q1', 'desc': subject}]}) + '</script>')
