@@ -60,7 +60,7 @@ const context = {
 const end = input.enhancer.lastIndexOf('})();');
 assert.ok(end > 0);
 const enhancer = input.enhancer.slice(0, end) + `
-globalThis.enhancer = {tjuToken, pushAnnot, pullAnnot, annotChanged, tjuAiSend, annot};
+globalThis.enhancer = {tjuToken, pushAnnot, pullAnnot, annotChanged, tjuAiSend, rerender, annot};
 ` + input.enhancer.slice(end);
 vm.createContext(context);
 vm.runInContext(enhancer, context);
@@ -152,6 +152,21 @@ const put = requests.find(request => request.method === 'PUT');
 assert.ok(put);
 assert.equal(put.headers.authorization, 'Bearer new-test-token');
 assert.equal(JSON.parse(put.body).notes.q1.v, 'queued note');
+""")
+
+    def test_annotation_rerender_invalidates_only_current_question_card(self):
+        self.run_scenario(r"""
+view = 'practice';
+pracList = ['q1'];
+pracIdx = 0;
+globalThis.renderPractice = function () {};
+renderPractice._cards = new Map([
+  ['q1|paper|0', {id: 'current'}],
+  ['q2|paper|0', {id: 'other'}]
+]);
+enhancer.rerender();
+assert.equal(renderPractice._cards.has('q1|paper|0'), false);
+assert.equal(renderPractice._cards.has('q2|paper|0'), true);
 """)
 
 
