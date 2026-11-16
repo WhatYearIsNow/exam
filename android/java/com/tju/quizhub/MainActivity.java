@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
         } else {
             web.loadUrl(MAIN_URL);
         }
-        updater.revalidate();   // 启动即后台比对清单，有新版自动下载，重启后生效
+        // 有缓存时由首页拦截触发更新；首次联网加载完成后再播种，避免与首屏重复下载。
         appUpdater.check();     // APK 壳有新版时在应用内提示，安装仍由系统确认
     }
 
@@ -90,9 +90,9 @@ public class MainActivity extends Activity {
         } catch (Exception ignored) {}
     }
 
-    /* 离线优先：同源主页面命中本地缓存就直接回包（同源保住 localStorage 里的
-     * 作答与同步配置），同时后台比对清单检查新版；未命中走网络，加载完成后
-     * 播种缓存。config.local.js 仅在离线兜底时使用缓存。 */
+    /* 离线优先：同源主页面和各科题库命中本地缓存就直接回包（同源保住
+     * localStorage 里的作答与同步配置），同时后台比对清单检查新版；
+     * 未命中走网络，加载完成后播种缓存。 */
     WebResourceResponse interceptRequest(WebResourceRequest req) {
         if (updater == null) return null;
         Uri u = req.getUrl();
@@ -110,6 +110,11 @@ public class MainActivity extends Activity {
         if (path.equals("/config.local.js")) {
             File cfg = updater.cache().configFile();
             if (cfg.isFile()) return updater.cache().response(cfg, "application/javascript");
+        }
+        String subject = CacheStore.subjectFromPath(path);
+        if (subject != null) {
+            File page = updater.cache().subjectFile(subject);
+            if (page.isFile()) return updater.cache().response(page, "text/html");
         }
         return null;
     }

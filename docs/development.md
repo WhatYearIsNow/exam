@@ -6,7 +6,7 @@
 
 ## 页面与题库
 
-`web/exam/marx.html`、`physics.html`、`probability.html` 分别包含各科页面逻辑和 `<subject>-data` JSON 题库。`web/exam/index.html` 是 iframe 切换入口；`web/index.html` 是站点首页，内嵌了三科页面的 base64 副本。
+`web/exam/*.html` 分别包含各科页面逻辑和 `<subject>-data` JSON 题库。`web/exam/index.html` 是裸页调试入口；`web/index.html` 是轻量站点壳，只按需加载当前科目，避免首屏下载全部题库。
 
 修改科目页面后，在项目根目录重建首页：
 
@@ -17,7 +17,7 @@ python3 tools/dev.py serve
 
 重建脚本同时从各科题库 JSON 计算首页的题量标签，避免页面文案与实际题数不一致。
 
-开发预览监听 `127.0.0.1:8902`。`tools/dev.py` 将工作区页面复制到 `.local/dev/site-*`，在那里重建 payload，再通过 `.local/dev/web` 提供页面，不改动正式页面。启动时清除继承的 `ILOVETJU_*` 环境变量，使用 `.local/dev/config.json`、`.local/dev/data/` 和单独生成的应用访问令牌；默认模型密钥为空。脚本拒绝复用当前正式配置中的口令或模型密钥。刷新预览副本时保留已有测试记录；源码修改后重新启动 `serve`，或在服务运行期间执行 `python3 tools/dev.py prepare`。
+开发预览监听 `127.0.0.1:8902`。`tools/dev.py` 将工作区页面复制到 `.local/dev/site-*`，在那里校验题库并更新首页题量，再通过 `.local/dev/web` 提供页面，不改动正式页面。启动时清除继承的 `ILOVETJU_*` 环境变量，使用 `.local/dev/config.json`、`.local/dev/data/` 和单独生成的应用访问令牌；默认模型密钥为空。脚本拒绝复用当前正式配置中的口令或模型密钥。刷新预览副本时保留已有测试记录；源码修改后重新启动 `serve`，或在服务运行期间执行 `python3 tools/dev.py prepare`。
 
 可在 Windows 编辑器中通过 SSH 打开 `/opt/exam`，把服务器的 8902 端口转发到本机；用独立浏览器配置或该端口查看预览。端口属于浏览器 origin 的一部分，开发站点的本地作答与正式域名独立。默认开发服务器只监听回环地址。
 
@@ -25,13 +25,13 @@ python3 tools/dev.py serve
 
 正式站点读取 `.local/current/web`，编辑工作区不直接上线。发布版本固定到 Git 提交并保存文件哈希；正式数据、服务端配置和下载文件单独持久化，详见 [部署说明](deployment.md#发布与回滚)。
 
-直接访问 `/exam/` 可调试科目裸页，访问 `/` 检查首页中的实际效果。首页自身的顶栏和增强功能直接在 `web/index.html` 中维护，重建脚本只更新其中的 `payload-*` 内容。
+直接访问 `/exam/` 可调试科目裸页，访问 `/` 检查首页中的实际效果。首页自身的顶栏、按需加载和增强功能直接在 `web/index.html` 中维护；重建脚本校验各科 JSON、更新题量，并确保旧 `payload-*` 模板块保持为空。
 
 ## 离线缓存与题库更新
 
-浏览器端离线能力由三个手工维护的部分组成：`web/sw.js`（Service Worker，cache-first 提供 `/` 与 `/config.local.js` 的离线回放）、`web/index.html` 末尾的注册与更新检查脚本（拉取 `/api/manifest` 比对哈希后写入 SW 缓存）。它们都不参与 `tools/build_frontend.py` 的构建，修改后无需重建 payload。服务端清单接口见 [部署说明](deployment.md)；Android 壳的同款机制（本地缓存 + 拦截回放 + 自动更新）见 `android/README.md` 的"离线模式"。
+浏览器端离线能力由三个手工维护的部分组成：`web/sw.js`（Service Worker，cache-first 提供轻量壳、各科题库页与配置的离线回放）、`web/index.html` 末尾的注册与更新检查脚本（拉取 `/api/manifest`，逐文件校验哈希后写入 SW 缓存）。服务端清单接口见 [部署说明](deployment.md)；Android 壳的同款机制见 `android/README.md` 的“离线模式”。
 
-三科页面的作答同步有持久化脏队列：离线期间的记录保存在 localStorage，恢复拉取成功后自动补推；注解脏标记同样持久化。改动同步逻辑需同步修改三个科目页面（复制粘贴的代码块）。
+各科页面的作答同步有持久化脏队列：离线期间的记录保存在 localStorage，恢复拉取成功后自动补推；注解脏标记同样持久化。改动同步逻辑需同步修改所有科目页面中的复制代码块。
 
 可选样式版本由 `python3 tools/build_premium.py` 生成到 `web/premium/`。这是生成目录，修改应落在科目源页面或构建脚本中。
 

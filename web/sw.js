@@ -1,12 +1,13 @@
 /* I Love TJU 壳页面离线缓存（Service Worker）。
  *
- * 只缓存两个同源资源：/（内嵌三科题库的单文档壳）与 /config.local.js。
+ * 缓存轻量壳页面、各科题库页与 /config.local.js。
  * 更新检测不在本文件：页面拉取 /api/manifest 比对哈希后直接写入本缓存，
  * 因此这里保持"纯缓存层"——cache-first 命中即返回，不主动联网校验。
- * 手工维护，不参与 tools/build_frontend.py 的 payload 构建。
+ * 手工维护，不参与 tools/build_frontend.py 的题量构建。
  */
 'use strict';
-var CACHE = 'tju-shell-v1';
+var CACHE = 'tju-shell-v2';
+var SUBJECT_PAGE = /^\/exam\/(marx|physics|probability|shezhi|gongtu|yingyu)\.html$/;
 
 function precache(cache, path) {
   var req;
@@ -40,9 +41,10 @@ self.addEventListener('fetch', function (ev) {
   if (url.pathname === '/api/manifest') return;
   if (url.pathname.indexOf('/api/') === 0 || url.pathname.indexOf('/sync') === 0) return;
   if (req.cache === 'reload' || req.cache === 'no-store') return;
-  var isNav = req.mode === 'navigate';
-  var key = isNav ? '/' : url.pathname;
-  if (!isNav && url.pathname !== '/config.local.js') return;
+  var isRoot = url.pathname === '/' || url.pathname === '/index.html';
+  var isSubject = SUBJECT_PAGE.test(url.pathname);
+  if (!isRoot && !isSubject && url.pathname !== '/config.local.js') return;
+  var key = isRoot ? '/' : url.pathname;
   ev.respondWith(caches.match(key).then(function (hit) {
     if (hit) return hit;
     return fetch(req).then(function (resp) {

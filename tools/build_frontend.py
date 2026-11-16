@@ -2,13 +2,12 @@
 """I Love TJU 原生前端重建脚本。
 
 用法: python3 tools/build_frontend.py [--web-dir WEB] [--exam-dir EXAM]
-1. 把 web/exam/{marx,physics,probability}.html 以 base64 重新打进
-   壳 web/index.html 的 payload-* 模板块（顶栏与增强层不动）。
-2. 重新生成调试页 web/exam/index.html（三个裸页的 iframe 切换器，
+1. 校验 web/exam/ 下各科题库并更新首页题量；各科页面保持独立文件，
+   首页运行时按需加载，避免首屏下载全部题库。
+2. 重新生成调试页 web/exam/index.html（各科裸页的 iframe 切换器，
    不再内嵌内容副本，永远与裸页同步）。
 """
 import argparse
-import base64
 import json
 import os
 import re
@@ -88,12 +87,13 @@ def build_frontend(web_dir, exam_dir):
         shell, changed = button_pattern.subn(update_count, shell, count=1)
         if not changed:
             raise ValueError(f'首页缺少 {subj} 学科按钮')
-        b64 = base64.b64encode(raw).decode()
         pat = re.compile(r'(<script[^>]*id=["\']payload-' + subj + r'["\'][^>]*>)(.*?)(</script>)', re.S)
         if not pat.search(shell):
             raise ValueError(f'payload-{subj} block not found in {shell_path}')
-        shell = pat.sub(lambda m: m.group(1) + b64 + m.group(3), shell, count=1)
-        print(f'[OK] payload-{subj} -> {len(b64)} chars (src {len(raw)} bytes, {count} questions)')
+        # 旧版本把完整页面 Base64 内嵌在这里；保留空模板块以兼容构建检查，
+        # 实际内容由首页从 /exam/<subject>.html 按需加载。
+        shell = pat.sub(lambda m: m.group(1) + m.group(3), shell, count=1)
+        print(f'[OK] subject-{subj} -> {len(raw)} bytes, {count} questions')
     with shell_path.open('w', encoding='utf-8', newline='') as f:
         f.write(shell)
     print(f'[OK] shell rebuilt: {shell_path}')

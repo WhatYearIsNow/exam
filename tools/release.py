@@ -90,7 +90,7 @@ def validate_source(source):
     subprocess.run([sys.executable, 'tools/build_frontend.py'], cwd=source,
                    env=env, check=True, stdout=subprocess.DEVNULL)
     if any(rt.sha256(source / name) != sha for name, sha in before.items()):
-        raise ValueError('Committed frontend payloads are stale; rebuild and commit first')
+        raise ValueError('Committed frontend shell is stale; rebuild and commit first')
     subprocess.run([sys.executable, 'tools/extract_bank.py', '--out',
                     str(source / 'export-check')], cwd=source, env=env, check=True,
                    stdout=subprocess.DEVNULL)

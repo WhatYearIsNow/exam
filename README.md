@@ -38,7 +38,7 @@ python3 server.py
 | `tests/` | 使用临时目录启动实际后端的集成测试 |
 | `data/`、`book/`、`.local/` | 个人运行数据、生成物和本地档案，均不纳入版本控制 |
 
-修改科目页面后运行 `python3 tools/build_frontend.py`，把更新写入首页内嵌页面。题库以 `web/exam/*.html` 为准；`bank-data-export/` 中的旧修正导出不自动合并。
+修改科目页面后运行 `python3 tools/build_frontend.py`，校验题库并更新首页题量。首页按需加载 `web/exam/*.html`，题库以这些科目页为准；`bank-data-export/` 中的旧修正导出不自动合并。
 
 ## 开发与部署
 
