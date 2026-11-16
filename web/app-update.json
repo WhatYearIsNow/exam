@@ -10,10 +10,10 @@
     },
     "preview": {
       "packageName": "com.tju.quizhub.preview",
-      "versionCode": 25005,
-      "versionName": "2.5-preview.5",
-      "apkUrl": "/Exam-2.5-preview.5.apk",
-      "releaseNotes": "修复三科作答进度串科及清除后恢复；升级后请将已串科记录再清除一次。"
+      "versionCode": 25006,
+      "versionName": "2.5-preview.6",
+      "apkUrl": "/Exam-2.5-preview.6.apk",
+      "releaseNotes": "提升加载速度：首屏使用轻量壳并按需加载科目；离线缓存适配六科独立题库页。"
     }
   }
 }
