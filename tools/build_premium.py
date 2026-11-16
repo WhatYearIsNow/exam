@@ -2,11 +2,10 @@
 """I Love TJU 质感版前端构建（默认输出到 web/premium/）。
 用法: python3 tools/build_premium.py [--web-dir WEB] [--exam-dir EXAM] [--out OUT]
 1. 把正式裸页（含全部功能与 ui-polish）复制到 premium/，注入 ui-premium-v1 质感层；
-2. 复制壳并重打 premium payload（顶栏/增强层/AI核验等一切功能不变）。
+2. 复制轻量壳并把按需加载路径改为 premium/ 内的质感版科目页。
 回退：直接删掉 premium/ 目录与 Caddy 路由即可，正式站零影响。
 """
 import argparse
-import base64
 import os
 import re
 from pathlib import Path
@@ -208,6 +207,10 @@ main{scrollbar-color:#b9c9dc transparent}
 def build_premium(web_dir, exam_dir, out_dir):
     web_dir, exam_dir, out_dir = Path(web_dir), Path(exam_dir), Path(out_dir)
     shell = (web_dir / 'index.html').read_text(encoding='utf-8')
+    lazy_source = "fetch(`/exam/${pageId}.html`"
+    if lazy_source not in shell:
+        raise ValueError('首页缺少按需加载入口')
+    shell = shell.replace(lazy_source, "fetch(`${pageId}.html`", 1)
     pages = {}
     for subj in SUBJECTS:
         html = (exam_dir / (subj + '.html')).read_text(encoding='utf-8')
@@ -215,12 +218,7 @@ def build_premium(web_dir, exam_dir, out_dir):
         if '</head>' not in html:
             raise ValueError(f'{subj}.html 缺少 </head>')
         pages[subj] = html.replace('</head>', PREMIUM + '\n</head>')
-        b64 = base64.b64encode(pages[subj].encode('utf-8')).decode()
-        pat = re.compile(r'(<script[^>]*id=["\']payload-' + subj + r'["\'][^>]*>)(.*?)(</script>)', re.S)
-        if not pat.search(shell):
-            raise ValueError(f'payload-{subj} block not found in {web_dir / "index.html"}')
-        shell = pat.sub(lambda m: m.group(1) + b64 + m.group(3), shell, count=1)
-        print(f'[OK] payload-{subj} -> {len(b64)} chars')
+        print(f'[OK] premium-{subj} -> {len(pages[subj])} chars')
 
     out_dir.mkdir(parents=True, exist_ok=True)
     for subj, html in pages.items():

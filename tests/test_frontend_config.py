@@ -80,6 +80,19 @@ class ConfigMarkupTests(unittest.TestCase):
         example = (ROOT / "web/config.example.js").read_text(encoding="utf-8")
         self.assertRegex(example, r"appToken:\s*''")
 
+    def test_shell_loads_subjects_on_demand_without_embedded_payloads(self):
+        html = (ROOT / "web/index.html").read_text(encoding="utf-8")
+        self.assertLess(len(html.encode("utf-8")), 200 * 1024)
+        self.assertIn("fetch(`/exam/${pageId}.html`", html)
+        for subject in ("marx", "physics", "probability", "shezhi", "gongtu", "yingyu"):
+            match = re.search(
+                r'<script[^>]*id="payload-' + subject + r'"[^>]*>(.*?)</script>',
+                html,
+                re.S,
+            )
+            self.assertIsNotNone(match)
+            self.assertEqual(match.group(1), "")
+
 
 @unittest.skipUnless(NODE, "Node.js is needed for iframe JavaScript behavior checks")
 class EnhancerConfigTests(unittest.TestCase):

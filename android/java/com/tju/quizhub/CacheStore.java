@@ -11,11 +11,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.security.MessageDigest;
 
-/* 站点离线缓存：应用私有目录 files/site-cache/ 下保存壳页面（/）与
+/* 站点离线缓存：应用私有目录 files/site-cache/ 下保存壳页面、各科题库页与
  * /config.local.js 的最近一份可用内容。只缓存与构建站点同源的响应；
  * meta.json 记录内容哈希，供 SiteUpdater 增量比对。写入用 tmp+rename
  * 原子替换，WebView IO 线程随时可读，无需加锁。免运行时权限。 */
 class CacheStore {
+    static final String[] SUBJECTS = {
+        "marx", "physics", "probability", "shezhi", "gongtu", "yingyu"
+    };
     private final File dir;
     private final File metaFile;
 
@@ -29,13 +32,30 @@ class CacheStore {
 
     File configFile() { return new File(dir, "config.local.js"); }
 
+    File subjectFile(String subject) { return new File(dir, "subject-" + subject + ".html"); }
+
     String rootSha() { return meta().optString("rootSha", null); }
 
     String configSha() { return meta().optString("configSha", null); }
 
+    String subjectSha(String subject) {
+        return meta().optString("subjectSha-" + subject, null);
+    }
+
     void storeRoot(byte[] data, String sha) { store(rootFile(), data, "rootSha", sha); }
 
     void storeConfig(byte[] data, String sha) { store(configFile(), data, "configSha", sha); }
+
+    void storeSubject(String subject, byte[] data, String sha) {
+        store(subjectFile(subject), data, "subjectSha-" + subject, sha);
+    }
+
+    static String subjectFromPath(String path) {
+        for (String subject : SUBJECTS) {
+            if (("/exam/" + subject + ".html").equals(path)) return subject;
+        }
+        return null;
+    }
 
     /* mime 形如 "text/html"；读失败返回 null 交回 WebView 走网络 */
     WebResourceResponse response(File f, String mime) {

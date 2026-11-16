@@ -127,15 +127,18 @@ class ServerIntegrationTests(unittest.TestCase):
         self.assertEqual(status, 200)
         self.assertTrue(payload["ok"])
         files = payload["files"]
-        self.assertEqual(set(files), {"/"})
+        self.assertEqual(set(files), {"/", "/exam/probability.html"})
         self.assertEqual(files["/"]["size"], len(server.index))
         self.assertEqual(files["/"]["sha256"],
                          hashlib.sha256(server.index).hexdigest())
+        self.assertEqual(files["/exam/probability.html"]["sha256"],
+                         hashlib.sha256(server.exam).hexdigest())
         local = b"window.ILOVETJU_CONFIG={appToken:'x'};\n"
         (server.web / "config.local.js").write_bytes(local)
         status, payload = server.request("GET", "/api/manifest")
         self.assertEqual(status, 200)
-        self.assertEqual(set(payload["files"]), {"/", "/config.local.js"})
+        self.assertEqual(set(payload["files"]),
+                         {"/", "/config.local.js", "/exam/probability.html"})
         self.assertEqual(payload["files"]["/config.local.js"]["sha256"],
                          hashlib.sha256(local).hexdigest())
 

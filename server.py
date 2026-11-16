@@ -44,6 +44,7 @@ MAX_SYNC_BODY = 25 * 1024 * 1024      # 作答记录全量同步上限
 MAX_ANNOT_BODY = 4 * 1024 * 1024      # 注解（备注/存疑/AI）上限
 MAX_CHECK_BODY = 1200 * 1024          # AI 校验请求上限（含缩图 base64）
 LLM_TIMEOUT = 90
+SUBJECT_PAGES = ("marx", "physics", "probability", "shezhi", "gongtu", "yingyu")
 
 _lock = threading.Lock()
 _cfg_cache = None
@@ -550,7 +551,10 @@ class Handler(SimpleHTTPRequestHandler):
     def _manifest_payload(self):
         """离线客户端更新检测用的静态文件清单（免鉴权，仅含哈希和大小）。"""
         files = {}
-        for route, name in (("/", "index.html"), ("/config.local.js", "config.local.js")):
+        entries = [("/", "index.html"), ("/config.local.js", "config.local.js")]
+        entries.extend(("/exam/%s.html" % subject, "exam/%s.html" % subject)
+                       for subject in SUBJECT_PAGES)
+        for route, name in entries:
             p = os.path.join(self.directory, name)
             try:
                 st = os.stat(p)

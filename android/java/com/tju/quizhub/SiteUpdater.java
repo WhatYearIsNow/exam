@@ -14,8 +14,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /* 站点更新器：比对 /api/manifest（免鉴权）里的内容哈希，发现变化时重新
- * 下载壳页面与 /config.local.js 到本地缓存。全程单线程后台执行；清单
- * 不可达时静默失败（离线场景），busy 标记避免并发重复下载 6MB 壳页面。 */
+ * 下载各科题库、配置与壳页面到本地缓存。先写题库、最后切换壳页面，避免
+ * 新壳开始按需加载时对应的离线题库尚未就绪。全程单线程后台执行；清单
+ * 不可达时静默失败（离线场景），busy 标记避免并发重复下载整套题库。 */
 class SiteUpdater {
     interface Done { void onDone(boolean reachable); }
 
@@ -67,12 +68,32 @@ class SiteUpdater {
         if (root == null) return false;
         String rootSha = root.optString("sha256", null);
 
-        String oldSha = cache.rootSha();
-        if (rootSha != null && !rootSha.equals(oldSha)) {
-            byte[] data = fetchBytes(BuildConfig.EXAM_URL);
-            if (data != null && rootSha.equals(CacheStore.sha256(data))) {
-                cache.storeRoot(data, rootSha);
-                if (oldSha != null) UiToast.show(app, "题库已更新，重启应用后生效");
+        boolean splitPages = false;
+        for (String subject : CacheStore.SUBJECTS) {
+            if (files.optJSONObject("/exam/" + subject + ".html") != null) {
+                splitPages = true;
+                break;
+            }
+        }
+        boolean subjectsReady = true;
+        if (splitPages) {
+            for (String subject : CacheStore.SUBJECTS) {
+                String route = "/exam/" + subject + ".html";
+                JSONObject item = files.optJSONObject(route);
+                if (item == null) {
+                    subjectsReady = false;
+                    continue;
+                }
+                String sha = item.optString("sha256", null);
+                if (sha != null && !sha.equals(cache.subjectSha(subject))) {
+                    byte[] data = fetchBytes(origin() + route);
+                    if (data != null && sha.equals(CacheStore.sha256(data))) {
+                        cache.storeSubject(subject, data, sha);
+                    }
+                }
+                if (sha == null || !sha.equals(cache.subjectSha(subject))) {
+                    subjectsReady = false;
+                }
             }
         }
 
@@ -84,6 +105,15 @@ class SiteUpdater {
                 if (data != null && cfgSha.equals(CacheStore.sha256(data))) {
                     cache.storeConfig(data, cfgSha);
                 }
+            }
+        }
+
+        String oldSha = cache.rootSha();
+        if (subjectsReady && rootSha != null && !rootSha.equals(oldSha)) {
+            byte[] data = fetchBytes(BuildConfig.EXAM_URL);
+            if (data != null && rootSha.equals(CacheStore.sha256(data))) {
+                cache.storeRoot(data, rootSha);
+                if (oldSha != null) UiToast.show(app, "题库已更新，重启应用后生效");
             }
         }
         return true;
